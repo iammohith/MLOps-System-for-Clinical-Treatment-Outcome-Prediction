@@ -2,67 +2,53 @@
 
 <div align="center">
 
-![JavaScript](https://img.shields.io/badge/Logic-Vanilla%20JS-F7DF1E?style=flat-square&logo=javascript)
-![HTML5](https://img.shields.io/badge/Structure-HTML5-E34F26?style=flat-square&logo=html5)
-![CSS3](https://img.shields.io/badge/Aesthetics-Glassmorphism-1572B6?style=flat-square&logo=css3)
+![JavaScript](https://img.shields.io/badge/Language-JavaScript-F7DF1E?style=flat-square&logo=javascript)
+![Design](https://img.shields.io/badge/Style-Modern-blue?style=flat-square)
 
 </div>
 
-## ✨ The Premium Experience
+## ✨ A User-Friendly Dashboard
 
-The frontend is a bespoke, responsive dashboard designed for clinical researchers. It prioritizes data integrity and visual impact through a "Glassmorphic" design system.
+This web application is designed to be simple and clear for researchers. It makes it easy to enter patient details and see the predicted results instantly.
 
-### Core Features
+### Key Features
 
-* **Dynamic Data Binding**: Category dropdowns are not hardcoded; they sync instantly with the ML lifecycle via the `/dropdown-values` endpoint.
-* **Animated Visualization**: Prediction results (0–10) are rendered using a high-fidelity SVG circle gauge with micro-animations.
-* **Zero-Tab Failure**: Reactive error handling displays API validation errors directly within the UI context.
+* **Automatic Lists**: The dropdown choices for conditions and drugs stay updated automatically as the system changes.
+* **Visual Results**: Predicted scores are shown on an easy-to-read circular gauge.
+* **Safety Reminders**: Important clinical disclaimers are always visible to ensure proper use.
 
 ---
 
-## 🏗️ Technical State Flow
+## 🏗️ How the App Behaves
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Idle
-    Idle --> LoadingDropdowns: Page Load
-    LoadingDropdowns --> FormReady: API Success
-    FormReady --> Submitting: User Clicks Predict
-    Submitting --> ResultDisplayed: HTTP 200
-    Submitting --> ErrorToast: HTTP 422/503
-    ResultDisplayed --> FormReady: Reset
-    ErrorToast --> FormReady: Fix Input
+    [*] --> Start
+    Start --> Loading: Page Opens
+    Loading --> Ready: Getting Rules from Service
+    Ready --> Working: User Clicks Predict
+    Working --> Success: Show Score
+    Working --> FixNeeded: Service found an Error
+    Success --> Ready: New Search
+    FixNeeded --> Ready: Correct Info
 ```
 
 ---
 
-## 🏃 Launch Instructions
+## 🏃 How to Open the App
 
-The frontend is a static asset set and can be served by any web server.
+The app is a simple set of files that can be opened in any web browser.
 
-### Option 1: Development Server
+### Simple Start
 
 ```bash
 cd frontend && python -m http.server 8080
 ```
 
-### Option 2: Production Container
-
-```bash
-docker build -t mlops-frontend -f infra/docker/Dockerfile.frontend .
-docker run -p 8080:80 mlops-frontend
-```
+Then visit: `http://localhost:8080`
 
 ---
 
-## 🎨 Design Philosophy
+## 🩺 Interaction
 
-* **Dark Mode Native**: Reduces eye strain for clinical research environments.
-* **Disclaimer First**: The non-clinical statement is pinned to the header to prevent misuse of the tool for primary diagnosis.
-* **Responsive Grid**: Optimized for both high-resolution workstations and mobile field tablets.
-
----
-
-## 🌐 API Interaction
-
-The UI expects the Inference API to be available at `http://localhost:8000`. This can be adjusted in `app.js` for remote deployments.
+The web app talks to the "Prediction Service" running on your computer. If the service isn't running, the web app won't be able to calculate new scores.

@@ -1,83 +1,69 @@
-# ⚡ High-Concurrency Inference Service
+# ⚡ Prediction Service
 
 <div align="center">
 
-![FastAPI](https://img.shields.io/badge/FastAPI-Serving-009688?style=flat-square&logo=fastapi)
-![Pydantic](https://img.shields.io/badge/Validation-Pydantic%20V2-E92063?style=flat-square&logo=pydantic)
-![Prometheus](https://img.shields.io/badge/Instrumentation-Prometheus-E6522C?style=flat-square&logo=prometheus)
+![FastAPI](https://img.shields.io/badge/Service-FastAPI-009688?style=flat-square&logo=fastapi)
+![Validation](https://img.shields.io/badge/Rules-Unified-E92063?style=flat-square&logo=pydantic)
 
 </div>
 
-## 🌐 API Landscape
+## 🌐 How the Service Works
 
-The Inference Service is a high-performance FastAPI application designed to serve Scikit-learn predictions with millisecond latency. It enforces strict schema compliance through dynamic Pydantic models.
+The Prediction Service is the engine that connects our math model to the web app. It receives patient information, checks it against our rules, and returns a predicted improvement score.
 
-### Endpoint Matrix
+### Service Routes
 
-| Method | Endpoint | Description | Auth Requirement |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/health` | Liveness & model readiness status. | Open |
-| `POST` | `/predict` | **Primary Inference**. Enforces Pydantic schema validation. | Role-Based |
-| `GET` | `/metrics` | Real-time Prometheus telemetry (Latency, Count). | Internal |
-| `GET` | `/dropdown-values` | **Source of Truth** for valid clinical inputs. | Open |
+| Path | What it does |
+| :--- | :--- |
+| `/health` | Shows if the service and model are ready to go. |
+| `/predict` | **Main Engine**. Takes patient data and returns a score. |
+| `/metrics` | Tracks how many people are using the system. |
+| `/dropdown-values` | Provides the list of valid drugs and conditions for the app. |
 
 ---
 
-## 🛡️ Dynamic Schema Enforcement
+## 🛡️ Automatic Rule Updates
 
-Our API validation layer is **Zero-Stale**. It avoids hardcoded constants by dynamically loading the allowed clinical values (Drugs, Conditions, Side Effects) from `params.yaml`.
+The service is smart. It doesn't use static lists; instead, it automatically loads the latest rules (like valid drug names) from our central configuration file.
 
 ```mermaid
 sequenceDiagram
-    participant C as Client (UI/curl)
-    participant A as FastAPI Service
-    participant P as params.yaml
-    participant M as RandomForest Model
+    participant C as User (Web App)
+    participant A as Prediction Service
+    participant P as Rule Book (Config)
+    participant M as Prediction Model
 
-    C->>A: POST /predict {data}
-    A->>P: Load Schema Logic
-    alt Valid Data
-        A->>M: Compute Prediction
-        A-->>C: 200 OK + Improvement_Score
-    else Invalid Data
-        A-->>C: 422 Unprocessable Entity
+    C->>A: Send Patient Info
+    A->>P: Check Rules
+    alt Info is Valid
+        A->>M: Calculate Score
+        A-->>C: Return 0-10 Score
+    else Info is Invalid
+        A-->>C: Show Error Message
     end
 ```
 
 ---
 
-## 📈 Observability & SLIs
-
-The service is fully instrumented using the standard `prometheus_client`.
-
-| Metric | Type | Purpose |
-| :--- | :--- | :--- |
-| `api_request_total` | Counter | Tracks throughput by status (200, 4xx, 5xx). |
-| `api_request_duration_seconds` | Histogram | Tracks p50, p95, and p99 latency distributions. |
-| `api_prediction_total` | Counter | Tracks total inference success count. |
-| `model_info` | Gauge | Reports active model version hash. |
-
----
-
-## 🏃 Operation Reference
+## 🏃 Running the Service
 
 ```bash
-# Launch optimized server
-gunicorn inference.app:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+# Start the prediction engine
+python -m uvicorn inference.app:app --host 0.0.0.0 --port 8000
 ```
-
-*(For local development, use `python -m uvicorn inference.app:app`)*
 
 ---
 
-## 🩺 Health Check Signature
+## 🩺 System Status
 
-A successful `/health` response guarantees that the designated model artifact was found and successfully deserialized into memory.
+When you check the `/health` link, you should see:
 
 ```json
 {
   "status": "healthy",
-  "model_loaded": true,
-  "model_version": "b1908566..."
+  "model_ready": true,
+  "version": "b1908566..."
 }
 ```
+
+This confirms that the system has successfully loaded the latest "learned patterns" and is ready to help.

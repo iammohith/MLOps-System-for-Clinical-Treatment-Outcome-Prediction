@@ -1,57 +1,53 @@
-# 📊 Observability & Telemetry
+# 📊 System Monitoring
 
 <div align="center">
 
-![Prometheus](https://img.shields.io/badge/Prometheus-TSDB-E6522C?style=flat-square&logo=prometheus)
-![Grafana](https://img.shields.io/badge/Grafana-Dashboards-F46800?style=flat-square&logo=grafana)
-![Uptime](https://img.shields.io/badge/SLA-99.9%25-green?style=flat-square)
+![Prometheus](https://img.shields.io/badge/Stat%20Tracker-Prometheus-E6522C?style=flat-square&logo=prometheus)
+![Grafana](https://img.shields.io/badge/Charts-Grafana-F46800?style=flat-square&logo=grafana)
 
 </div>
 
-## 🔭 Monitoring Architecture
+## 🔭 Watching the System
 
-This repository provides a production-honest observability suite, tracking the health and performance of clinical outcome inferences in real-time.
+This part of the system watches how well the predictions are working in real-time. It helps ensure that the service remains fast and accurate.
 
-### 📈 Service Level Indicators (SLIs)
+### 📈 Important Stats
 
-| Category | Metric Name | Purpose |
-| :--- | :--- | :--- |
-| **Traffic** | `api_request_total` | Tracks system load and endpoint popularity. |
-| **Latency** | `api_request_duration_seconds` | High-fidelity histograms for p95/p99 latency. |
-| **Errors** | `api_prediction_errors_total` | Real-time visibility into model/preprocessor failures. |
-| **Metadata** | `model_info` | Tracks which model version is currently in-flight. |
-
----
-
-## 🎛️ Grafana Dashboards
-
-We provide a pre-configured dashboard at `monitoring/grafana/dashboards/api_dashboard.json`.
-
-### Visualization Pillars
-
-1. **Request Rate**: Time-series view of method/status distribution.
-2. **Latency Quantiles**: Visual proof of millisecond responsiveness.
-3. **Error Concentration**: Immediate identification of invalid record spikes.
-4. **Version Tracking**: Confirmation of the active DVC model hash.
+| Category | What it means |
+| :--- | :--- |
+| **Usage** | How many people are using the system right now. |
+| **Speed** | How many seconds it takes to provide a prediction. |
+| **Errors** | If any calculations have failed or been blocked. |
+| **Version** | Which version of the AI model is currently active. |
 
 ---
 
-## 🏃 Deployment
+## 🎛️ Performance Charts
+
+We have built a dashboard that shows these stats in easy-to-read charts.
+
+1. **Usage Rate**: Shows if the system is getting busy.
+2. **Response Time**: Shows if the system is staying fast.
+3. **Accuracy Check**: Shows if the math is following expected patterns.
+
+---
+
+## 🏃 How to View
 
 ```bash
-# Part of the Docker stack
+# Start the monitoring tools
 docker compose -f infra/docker/docker-compose.yml up prometheus grafana
 ```
 
-### 🔐 Credentials
+### 🔐 Access Details
 
-* **URL**: `http://localhost:3000`
-* **Default User**: `admin`
-* **Default Pass**: `mlops2024`
+* **Link**: `http://localhost:3000`
+* **User**: `admin`
+* **Pass**: `mlops2024`
 
 ---
 
-## 🛡️ Best Practices Enforced
+## 🛡️ Best Practices
 
-* **Autodiscovery**: Prometheus is pre-configured to scrape the `inference-api` container within the internal Docker bridge network.
-* **Persistence**: Dashboards are managed as code to ensure 1:1 parity between local development and production observability.
+* **Safe Tracking**: The system is set up to automatically find the prediction engine and start watching it.
+* **Always Ready**: The charts are saved as part of the code, so they are always ready to use when you start the system.

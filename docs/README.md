@@ -1,40 +1,39 @@
-# 📚 Knowledge & Documentation Hub
+# 📚 Documentation Center
 
 <div align="center">
 
-![Docs](https://img.shields.io/badge/Format-Markdown-blue?style=flat-square&logo=markdown)
-![API](https://img.shields.io/badge/Docs-Swagger/OpenAPI-green?style=flat-square&logo=openai)
-![Design](https://img.shields.io/badge/Design-Conceptual--Roadmap-orange?style=flat-square)
+![Format](https://img.shields.io/badge/Format-Markdown-blue?style=flat-square&logo=markdown)
+![Interface](https://img.shields.io/badge/Docs-Interactive-green?style=flat-square)
 
 </div>
 
-## 🌍 Documentation Ecosystem
+## 🌍 Where to find information
 
-This system maintains documentation at three distinct levels of abstraction: **Execution**, **Interface**, and **Concept**.
+This system has information organized for different needs: **Starting Out**, **Exploring**, and **Planning**.
 
-### 📖 Content Directory
+### 📖 Folder Guide
 
-| Resource | Purpose | Format |
-| :--- | :--- | :--- |
-| **Root README** | System setup & authoritative verification. | Markdown |
-| **Interactive API** | Sandbox for testing request validation. | Swagger / OpenAPI |
-| **Monitoring Design** | Conceptual roadmap for drift detection. | `model_monitoring.md` |
-
----
-
-## 🕹️ Interactive API Reference
-
-When the system is running (`make run-pipeline && python -m uvicorn inference.app:app`), developers can access the live sandbox:
-
-**URL**: <http://localhost:8000/docs>
-
-### 🔬 What to Test
-
-* **Schema Rejection**: Send an invalid `Patient_ID` or out-of-range `Age` to observe Pydantic's 422 error logic.
-* **Predictive Hot-Path**: Execute a valid POST to verify millisecond-level inference.
+| Resource | Goal |
+| :--- | :--- |
+| **Main Guide** | The best place to start. Explains setup and usage. |
+| **Interactive API** | A sandbox to test predictions without the web app. |
+| **Future Planning** | Concepts for how to improve the system further. |
 
 ---
 
-## 🔮 Future Roadmap
+## 🕹️ Interactive Testing
 
-See `docs/model_monitoring.md` for a deep-dive into the conceptual implementation of **Data Drift Detection** using PSI (Population Stability Index) and KS-Tests.
+When the Prediction Service is running, you can access a special "sandbox" page:
+
+**Link**: `http://localhost:8000/docs`
+
+### 🔬 What to try
+
+* **Test Errors**: Try typing an invalid age to see how the system catches mistakes.
+* **Test Success**: Type a valid patient profile to see how fast the system gives a result.
+
+---
+
+## 🔮 What's Next?
+
+You can read `docs/model_monitoring.md` to see our plans for how to keep the system accurate over many years as patient trends change.

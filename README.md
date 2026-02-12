@@ -13,53 +13,53 @@
 
 ---
 
-**An authoritative AI-clinical integration framework for treatment improvement prediction.**  
-Built for high-trust environments where reproducibility and observability are non-negotiable.
+**A professional system for predicting how well a clinical treatment might work.**  
+Built to be reliable, easy to restart, and easy to monitor.
 
-[Quick Start](#-quick-setup) • [Architecture](#-high-fidelity-architecture) • [Validation](#-zero-trust-validation) • [Monitoring](#-observability-matrix)
+[Quick Start](#-quick-setup) • [How it Works](#-system-workflow) • [Verification](#-system-verification) • [Monitoring](#-viewing-results)
 
 </div>
 
 ---
 
-## 📖 System Purpose
+## 📖 What this does
 
-This repository implements a production-honest MLOps lifecycle for clinical research. It predicts a patient's **Improvement_Score** (0–10) following treatment, enabling pharmaceutical researchers and clinicians to identify high-efficacy patterns across varying medical contexts.
+This project helps researchers predict a patient's **Improvement Score** (on a scale of 0 to 10) after receiving a specific treatment. It uses historical data to help identify which treatments might be most effective for different types of patients.
 
-### 🛡️ Core Guarantees
+### 🛡️ Why it's reliable
 
-* **100% Deterministic**: Fixed random seeds and pinned preprocessing transformers ensure identical predictions across all environments.
-* **Dynamic Synchronization**: The API validation layer and Web UI are dynamically unified with the lifecycle configuration (`params.yaml`).
-* **Fail-Hard Quality**: A Zero-Trust validation protocol prevents the release of broken models or inconsistent manifests.
+* **Consistent Results**: The system is set up so that you get the same prediction every time you run it with the same data.
+* **Always in Sync**: The web interface and the underlying math use the same rules automatically.
+* **Safety Checks**: Built-in tests prevent the system from running if something is broken or inconsistent.
 
 ---
 
-## 🏗️ High-Fidelity Architecture
+## 🏗️ System Workflow
 
 ```mermaid
 graph TD
-    subgraph "Data Pipeline (DVC)"
-        A["[Raw Data]"] --> B["Ingest Stage"]
-        B --> C["Validate Stage"]
-        C --> D["Preprocess Stage"]
-        D --> E["Train Stage"]
-        E --> F["Evaluate Stage"]
+    subgraph "Step-by-Step Data Process"
+        A["[Raw Data]"] --> B["Get Data"]
+        B --> C["Check Rules"]
+        C --> D["Prepare for Math"]
+        D --> E["Train Model"]
+        E --> F["Check Accuracy"]
     end
 
-    subgraph "Model Management"
-        F --> G[("Model Registry (.joblib)")]
-        D --> H[("Preprocessor (.joblib)")]
+    subgraph "Model Storage"
+        F --> G[("Saved Model")]
+        D --> H[("Saved Rules")]
     end
 
-    subgraph "Serving Layer (K8s/Docker)"
-        G & H --> I["FastAPI Inference Service"]
-        I -- "POST /predict" --> J["Web Frontend"]
-        J -- "User Input" --> I
+    subgraph "User Interface"
+        G & H --> I["Prediction Service"]
+        I -- "Show Prediction" --> J["Web App"]
+        J -- "Type Patient Info" --> I
     end
 
-    subgraph "Observability"
-        I -- "/metrics" --> K["Prometheus"]
-        K --> L["Grafana Dashboard"]
+    subgraph "Monitoring"
+        I -- "Performance Data" --> K["Tracker"]
+        K --> L["Dashboards"]
     end
 
     style I fill:#009688,color:#fff
@@ -73,81 +73,79 @@ graph TD
 
 ## 🚀 Quick Setup
 
-### ⚡ The Power of Makefile
+### ⚡ Easy Start with 'Makefile'
 
-Skip the manual friction. Our `Makefile` enforces a standardized local environment.
+We use a small automation tool called a `Makefile` to make setup easy and consistent.
 
 ```bash
+# 1. Get the code
 git clone https://github.com/iammohith/MLOps-System-For-Clinical-Treatment-Outcome-Prediction.git
 cd MLOps-System-For-Clinical-Treatment-Outcome-Prediction
 
-# 🏗️ Creates venv, installs optimized deps, and initializes DVC idempotently
+# 🏗️ 2. Automated Setup (Installs everything needed)
 make setup
 
-# 🧪 Runs full end-to-end pipeline (Ingest -> Train -> Evaluate)
+# 🧪 3. Run the whole process (From data to finished prediction model)
 make run-pipeline
 
-# 🛡️ Performs Zero-Trust Release Validation (API checks, Docker, K8s)
+# 🛡️ 4. Final Verification (Checks if everything is truly working)
 make validate
 ```
 
 ---
 
-## 🛠️ Tech Stack Spotlight
+## 🛠️ The Tech Used
 
-| Component | Technology | Role |
+| Part | Tool | Role |
 | :--- | :--- | :--- |
-| **Lifecycle** | **DVC** | Tracks data versions and pipeline lineage. |
-| **Logic Layer** | **Python 3.10+** | High-performance clinical computations. |
-| **Inference** | **FastAPI** | High-concurrency serving with async instrumentation. |
-| **Validation** | **Pydantic V2** | Dynamic schema enforcement from `params.yaml`. |
-| **Containers** | **Docker** | Isolated multi-stage builds for Dev/Stage/Prod. |
-| **Monitoring** | **Prometheus** | Real-time SLI collection (Latency, Throughput, Errors). |
+| **Logic** | **Python** | The primary language that does the calculations. |
+| **Math** | **Scikit-Learn** | The library used to build the prediction model. |
+| **Data Tracking** | **DVC** | Remembers exactly which data was used for which model. |
+| **Web Service** | **FastAPI** | Makes the model available for the web app to talk to. |
+| **Containers** | **Docker** | Packages everything so it runs the same on any computer. |
+| **Monitoring** | **Prometheus** | Watches how fast and accurately predictions are made. |
 
 ---
 
-## 📊 Observability Matrix
+## 📊 Viewing Results
 
-Our system provides deep visibility into the inference hot-path.
+You can see the system in action through several simple links:
 
-### Live Targets
-
-1. **Web UI**: `http://localhost:8080` — Clinical dash with glassmorphic design.
-2. **API Health**: `http://localhost:8000/health` — Real-time model readiness info.
-3. **Prometheus**: `http://localhost:9090` — Target scraping and alerting.
-4. **Grafana**: `http://localhost:3000` — Executive p95/p99 latency visualizations.
+1. **Web App**: `http://localhost:8080` — The friendly screen where you type patient info.
+2. **System Health**: `http://localhost:8000/health` — Sees if the math engine is ready.
+3. **Data Tracking**: `http://localhost:9090` — Sees how many people are using the system.
+4. **Dashboards**: `http://localhost:3000` — Beautiful charts showing system performance.
 
 ---
 
-## 🛡️ Zero-Trust Validation
+## 🛡️ Final Checks
 
-RELEASE AUTHORIZATION is purely binary. We do not accept caveats.
+We verify every part of the system before it's considered "ready."
 
-| Check | Tool | Success Criteria |
-| :--- | :--- | :--- |
-| **Integrity** | `release_check.py` | All 42+ mandatory files present/hash-valid. |
-| **Pipeline** | `dvc repro` | Zero diffs between code and model hash. |
-| **Docker** | `docker build` | 100% build success for Image Hierarchy. |
-| **K8s** | `kubectl dry-run` | Zero manifest syntax or resource violations. |
-| **Runtime** | `requests/uvicorn` | 200 OK on `/predict` with verified logic. |
+| Check | What it confirms |
+| :--- | :--- |
+| **Files** | All necessary code and data files are in place. |
+| **Math Process** | The data flows correctly from start to finish. |
+| **Containers** | The system starts up correctly in its packaged form. |
+| **Service** | The web app and math engine talk to each other perfectly. |
 
 ---
 
-## 🚧 Repository Integrity
+## 🚧 Folder Structure
 
 ```text
-├── Makefile                     # Root automation engine
-├── params.yaml                  # System-wide single source of truth
-├── dvc.yaml                     # Pipeline definition
-├── inference/                   # FastAPI high-concurrency layer
-├── pipelines/                   # Lifecycle stages (Ingest/Preprocess)
-├── training/                    # Scikit-learn logic & metrics
-├── validation/                  # Release authorization engine
-└── infra/                       # Docker & K8s deployment manifests
+├── Makefile                     # Easy setup commands
+├── params.yaml                  # The main rules for the system
+├── dvc.yaml                     # The step-by-step math workflow
+├── inference/                   # The web prediction engine
+├── pipelines/                   # How data is prepared
+├── training/                    # How the model learns
+├── validation/                  # Final consistency tests
+└── infra/                       # Packaged deployment files
 ```
 
 ---
 
-## ⚖️ Disclosure & Disclaimer
+## ⚖️ Please Note
 
-This software is intended for **Research and Exploratory Analytics** only. It is not an FDA-cleared medical device and should not be used in the direct treatment or diagnosis of clinical patients.
+This tool is for **Research and Analysis** only. It is not a medical device and should not be used to diagnose or treat real patients.

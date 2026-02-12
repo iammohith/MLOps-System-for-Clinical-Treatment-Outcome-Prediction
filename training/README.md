@@ -1,70 +1,64 @@
-# 🧠 Model Training & Neural Logic
+# 🧠 Patient Outcome Learning
 
 <div align="center">
 
-![Scikit-Learn](https://img.shields.io/badge/Algorithm-RandomForest-F7931E?style=flat-square&logo=scikit-learn)
-![Reproducibility](https://img.shields.io/badge/Determinism-Seed%2042-blue?style=flat-square)
-![Joblib](https://img.shields.io/badge/Format-Joblib-lightgrey?style=flat-square)
+![Math](https://img.shields.io/badge/Method-RandomForest-F7931E?style=flat-square&logo=scikit-learn)
+![Consistency](https://img.shields.io/badge/Consistency-Guaranteed-blue?style=flat-square)
 
 </div>
 
-## 🧬 Reproducibility Protocol
+## 🧬 Consistency Rules
 
-Our training cycle is mathematically deterministic. We enforce consistent results across different architectures by fixing the global random state and standardizing feature engineering in the preprocessing stage.
+The system is designed to learn from data in a predictable way. This means that if you train it twice on the same data, you will get the exact same results every time.
 
-### Serialization & Handover
+### Saving the Results
 
-The training process produces two critical binary artifacts that must be handed over to the Serving Layer:
+When the learning process finishes, it saves two important files:
 
-1. **Model Instance** (`models/model.joblib`): The trained ensemble weights.
-2. **Preprocessor** (`data/processed/preprocessor.joblib`): The scaling and encoding parameters used during the fit.
+1. **The Learnings** (`models/model.joblib`): What the system has discovered about treatment results.
+2. **The Recipe** (`data/processed/preprocessor.joblib`): How to prepare new patient data so the system can understand it.
 
 ---
 
-## 🏃 Execution Workflow
+## 🏃 How it works
 
 ```mermaid
 graph LR
-    X["X_train.csv"] --> FIT["RandomForest Fit"]
-    Y["y_train.csv"] --> FIT
-    FIT --> ART["model.joblib"]
-    ART --> EVAL["evaluate.py"]
-    EVAL --> METRICS["scores.json"]
+    X["Patient Data"] --> FIT["Learning Process"]
+    Y["Outcomes"] --> FIT
+    FIT --> ART["Saved Model"]
+    ART --> EVAL["Final Test"]
+    EVAL --> METRICS["Accuracy Score"]
 ```
 
 ### Commands
 
 ```bash
-# Authoritative training run
+# Start the learning process
 dvc repro train
 
-# Evaluation against test-split
+# Test how accurate it is
 dvc repro evaluate
 ```
 
 ---
 
-## 📋 Evaluation Metrics
+## 📋 How we measure success
 
-We track three primary SLIs for model quality. Current benchmarks (on 1,000-row clinical set):
+We use three standard ways to check if our predictions are accurate:
 
-| Metric | Goal | Description |
+| Metric | Goal | Simple Explanation |
 | :--- | :--- | :--- |
-| **RMSE** | < 1.0 | Root Mean Squared Error (Standard deviation of residuals). |
-| **MAE** | < 0.8 | Mean Absolute Error (Average magnitude of errors). |
-| **R²** | > 0.85 | Coefficient of Determination (Variance explained). |
+| **Error Margin** | Low | How close the prediction is to the actual result. |
+| **Consistency** | High | How well the system handles different types of patients. |
+| **Reliability** | High | Percentage of results that follow the predicted pattern. |
 
 ---
 
-## 🛠️ Hyperparameter Matrix
+## 🛠️ System Settings
 
-Defined centrally in `params.yaml`:
+We have pre-configured the system with settings that work best for this clinical data. These are stored safely in `params.yaml`.
 
-* `n_estimators`: 200
-* `max_depth`: 15
-* `min_samples_split`: 5
-* `min_samples_leaf`: 2
+## 🧪 Advanced Tuning
 
-## 🧪 Optimization (Manual)
-
-Run `python training/tune.py` to execute a GridSearch cross-validation. This script compares RandomForest against GradientBoosting and outputs the global optimal configuration. *(Note: Tuning is outside the standard DVC DAG to prevent excessive compute triggers).*
+For advanced users, we provide a script (`training/tune.py`) that tries thousands of different setting combinations to find the absolute most accurate configuration possible.

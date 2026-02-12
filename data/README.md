@@ -1,29 +1,28 @@
-# 🗄️ Data Management Layer
+# 🗄️ Data Management
 
 <div align="center">
 
 ![DVC](https://img.shields.io/badge/DVC-Data%20Versioning-945DD6?style=flat-square&logo=dvc)
-![SQLite](https://img.shields.io/badge/Schema-Validated-003B57?style=flat-square&logo=sqlite)
-![S3](https://img.shields.io/badge/Remote-Local/S3-569A31?style=flat-square&logo=amazons3)
+![SQLite](https://img.shields.io/badge/Schema-Verified-003B57?style=flat-square&logo=sqlite)
 
 </div>
 
-## 🧬 Data Lineage & Flow
+## 🧬 How Data Flows
 
-The system strictly segregates raw input from processed artifacts to ensure zero data leakage and 100% reproducibility.
+The system keeps the original data clean and separate from the processed versions used by the AI. This ensures that every result can be repeated exactly.
 
 ```mermaid
 graph LR
     subgraph "Storage"
-        RAW["data/raw/*.csv"]
+        RAW["data/raw/"]
         PROC["data/processed/"]
     end
 
-    subgraph "DVC Lifecycle"
-        RAW -- "Ingest Script" --> INGESTED["ingested.csv"]
-        INGESTED -- "Validate Logic" --> VALIDATED["validated.csv"]
-        VALIDATED -- "Preprocess Logic" --> ENCODED["X_train.csv | y_train.csv"]
-        ENCODED -- "Serialization" --> JOB["preprocessor.joblib"]
+    subgraph "Preparation Steps"
+        RAW -- "Stage 1" --> INGESTED["Copying Data"]
+        INGESTED -- "Stage 2" --> VALIDATED["Checking Rules"]
+        VALIDATED -- "Stage 3" --> ENCODED["Preparing for Math"]
+        ENCODED -- "Save" --> JOB["Final Recipe"]
     end
 
     style RAW fill:#f9f,stroke:#333
@@ -32,39 +31,39 @@ graph LR
 
 ---
 
-## 📋 Technical Schema Contract
+## 📋 Data Rules
 
-All clinical records must adhere to this contract. The `Validate` stage and the `Inference API` both use this as the single source of truth.
+Every patient record must follow these rules. Both the preparation steps and the web app use these exact same rules.
 
-### Numeric Features
+### Number Rules
 
-| Field | Range | Constraints |
+| Category | Allowed Range | Type |
 | :--- | :--- | :--- |
-| `Age` | 18 – 79 | Integer |
-| `Dosage_mg` | [50, 100, 250, 500, 850] | Fixed Categorical-Numeric |
-| `Treatment_Duration_days` | 5 – 59 | Daily integer count |
+| `Age` | 18 – 79 | Whole Number |
+| `Dosage_mg` | 50, 100, 250, 500, or 850 | Specific Options |
+| `Duration` | 5 – 59 | Days |
 
-### Categorical Features (Labels)
+### Label Rules
 
-* **Gender**: `Female`, `Male`
-* **Condition**: `Depression`, `Diabetes`, `Hypertension`, `Infection`, `Pain Relief`
-* **Drug_Name**: (15 validated pharmaceutical identifiers)
-* **Side_Effects**: (30 validated clinical reports)
+* **Gender**: `Female` or `Male`
+* **Condition**: `Depression`, `Diabetes`, `Hypertension`, `Infection`, or `Pain Relief`
+* **Drug Names**: 15 specific medicines are supported.
+* **Side Effects**: 30 standard medical observations are supported.
 
 ---
 
-## 🛠️ Management Commands
+## 🛠️ Handy Commands
 
 | Goal | Command |
 | :--- | :--- |
-| **Pull Artifacts** | `dvc pull` |
-| **Check Data Status** | `dvc status` |
-| **Purge & Refresh** | `rm -rf data/processed/* && dvc repro` |
+| **Update Data** | `dvc pull` |
+| **Check Status** | `dvc status` |
+| **Fresh Start** | `rm -rf data/processed/* && dvc repro` |
 
 ---
 
-## 🚫 Safe State Guarantees
+## 🚫 Safe Data Handling
 
-1. **Immutability**: `data/raw/` is never modified by the code.
-2. **Tracking**: Every file in `data/processed/` is tracked by `.dvc` files to prevent large binaries in Git.
-3. **Encapsulation**: Preprocessing transformers (`preprocessor.joblib`) are packaged for identical usage in both Training and Serving layers.
+1. **Protected Source**: The code never changes the files in `data/raw/`.
+2. **Detailed Tracking**: Every step taken to prepare the data is remembered by the system.
+3. **Consistency**: The same "recipe" used to prepare data for learning is used when making new predictions.

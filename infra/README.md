@@ -1,60 +1,52 @@
-# 🏗️ Infrastructure & Orchestration
+# 🏗️ Systems & Infrastructure
 
 <div align="center">
 
-![Docker](https://img.shields.io/badge/Docker-Images-2496ED?style=flat-square&logo=docker)
-![Kubernetes](https://img.shields.io/badge/K8s-Manifests-326CE5?style=flat-square&logo=kubernetes)
-![Infrastructure](https://img.shields.io/badge/Orchestration-Kind/Minikube-blue?style=flat-square)
+![Docker](https://img.shields.io/badge/Container-Docker-2496ED?style=flat-square&logo=docker)
+![Kubernetes](https://img.shields.io/badge/Orchestration-Kubernetes-326CE5?style=flat-square&logo=kubernetes)
 
 </div>
 
-## 🐳 Docker Stack
+## 🐳 Packaged Versions (Docker)
 
-Our registry uses multi-stage builds to optimize image size and security. The stack is segmented into three primary domains: **Training**, **Serving**, and **Edge UI**.
+We use a tool called Docker to package the system so it runs exactly the same way on every computer.
 
-### Image Hierarchy
+| Part | Role |
+| :--- | :--- |
+| **Learning Engine** | Runs the math process to train the system. |
+| **Prediction Engine** | Makes the results available to the web. |
+| **Web Screen** | Provides the user interface. |
 
-| Service | Dockerfile | Exposed Port | Role |
-| :--- | :--- | :--- | :--- |
-| `training` | `Dockerfile.training` | N/A | Batch processing & Model generation. |
-| `inference-api` | `Dockerfile.inference` | 8000 | Production-grade FastAPI serving. |
-| `frontend` | `Dockerfile.frontend` | 80 | Nginx-backed static content delivery. |
-
-### Compose Management
+### Starting Everything Together
 
 ```bash
-# Authoritative Stack Start
+# Start all parts of the system at once
 docker compose -f infra/docker/docker-compose.yml up --build -d
 ```
 
 ---
 
-## ☸️ Kubernetes Manifests
+## ☸️ Advanced Setup (Kubernetes)
 
-The system is orchestrated for local clusters (`kind`, `minikube`) and is designed for zero-manual-config deployments.
-
-### Manifest Hierarchy
+For more advanced setups, we provide files to run the system in a cluster environment.
 
 ```mermaid
 graph TD
-    NS["namespace.yaml"] --> CF["ConfigMaps"]
-    CF --> DEPL["Deployments"]
-    DEPL --> SVC["Services (NodePort)"]
-    SVC --> ING["Ingress (Optional)"]
+    A["System Rules"] --> B["Running Services"]
+    B --> C["Web Access Labels"]
 ```
 
-### 🛣️ NodePort Mapping (Local Access)
+### Accessing the System
 
-| Component | NodePort | Access URL |
-| :--- | :--- | :--- |
-| **Frontend** | 30880 | `http://localhost:30880` |
-| **API** | 30800 | `http://localhost:30800` |
-| **Grafana** | 30300 | `http://localhost:30300` |
+When running in a cluster, different parts are available at specific local addresses:
+
+* **Web App**: `http://localhost:30880`
+* **Prediction Service**: `http://localhost:30800`
+* **Dashboard**: `http://localhost:30300`
 
 ---
 
 ## 🛡️ Reliability Guarantees
 
-* **Dry-Run Enforced**: Every manifest is validated for syntax and schema integrity.
-* **Isolation**: All components reside in the `mlops` namespace to prevent resource collisions.
-* **Decoupled Config**: Monitoring targets and API environments are managed via ConfigMaps.
+* **Checked Manifests**: All setup files are checked for errors before they are used.
+* **Isolated Parts**: Different parts of the system are kept separate so they don't interfere with each other.
