@@ -28,7 +28,7 @@ An end-to-end MLOps system for predicting patient treatment improvement scores u
 │                     SERVING LAYER                               │
 │  ┌────────────────────┐           ┌─────────────────────┐       │
 │  │   FastAPI Service  │←─── POST ─│    Web Frontend     │       │
-│  │  :8000             │    /predict│    :8080           │       │
+│  │  :8000             │  /predict │    :8080            │       │
 │  │  /health           │           │                     │       │
 │  │  /predict          │           │  • Patient form     │       │
 │  │  /metrics          │           │  • Animated gauge   │       │
