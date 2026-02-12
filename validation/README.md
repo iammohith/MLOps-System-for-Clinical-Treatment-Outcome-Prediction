@@ -1,27 +1,47 @@
-# Validation & Quality Gates
+# 🛡️ Authoritative Validation Engine
 
-The single source of truth for repository integrity. No release is authorized unless the scripts in this directory pass with code `0`.
+<div align="center">
 
-## 🛡️ Authoritative Check (`release_check.py`)
+![Zero-Trust](https://img.shields.io/badge/Security-Zero%20Trust-black?style=flat-square)
+![Quality](https://img.shields.io/badge/Quality-Enforced-green?style=flat-square)
+![Compliance](https://img.shields.io/badge/Compliance-DVC--Verified-blue?style=flat-square)
 
-This is the "Zero-Trust" engine. It assumes nothing and verifies:
+</div>
 
-1. **Integrity**: Existence of all mandatory ML and Infra files.
-2. **Execution**: Completes a full `dvc repro` smoke test.
-3. **Containerization**: Builds all 3 custom Docker images.
-4. **Orchestration**: Dry-run validates all K8s manifests.
-5. **Runtime**: Launches a transient API and verifies `/health`, `/predict`, and `/metrics`.
+## 🚪 Post-Remediation Quality Gates
 
-### Usage
+As of the latest Senior Engineer remediation, repository verification is binary. We do not allow "partial" success. The `validation/` directory contains the authoritative logic that guards the release.
+
+---
+
+## ⚡ The Release Decision Matrix
+
+Every release is scrutinized by the `release_check.py` engine across 5 critical vectors.
+
+| Vector | Check | Fail Condition |
+| :--- | :--- | :--- |
+| **Integrity** | Hash-verify core artifacts. | Missing `.dvc` files or `params.yaml`. |
+| **Lifecycle** | `dvc repro` smoke test. | Stale model or broken DAG. |
+| **Images** | Multi-stage Docker build. | Compiler error or missing deps. |
+| **Manifests** | K8s dry-run validation. | Syntax error or invalid API version. |
+| **Hot-Path** | API `/predict` logic check. | Incorrect prediction or timeout. |
+
+---
+
+## 🏃 Authority Commands
 
 ```bash
-# Recommended (runs in project venv)
+# The One-Step Quality Gate (Recommended)
 make validate
 
-# Manual
+# The Technical Deep-Audit
 python validation/release_check.py
 ```
 
-## 📜 Legacy Validation (`validate_repo.py`)
+---
 
-Maintained for air-gapped or restricted environments. It provides "soft" verification (warnings) without enforcing Docker or Pipeline runs.
+## 📜 Legacy Compatibility
+
+The `validate_repo.py` script is maintained for non-Docker environments. It provides **soft-validation** (warnings) but does NOT authorize a production-honest release.
+
+**Rule of Thumb**: If `release_check.py` fails, the repository is BROKEN for external engineers.

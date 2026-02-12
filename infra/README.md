@@ -1,39 +1,60 @@
-# Infrastructure (Containerization & Orchestration)
+# 🏗️ Infrastructure & Orchestration
 
-Standardized manifests for local development and edge deployment. All artifacts here are verified via dry-runs in the `make validate` protocol.
+<div align="center">
 
-## 🐳 Docker (Local Development)
+![Docker](https://img.shields.io/badge/Docker-Images-2496ED?style=flat-square&logo=docker)
+![Kubernetes](https://img.shields.io/badge/K8s-Manifests-326CE5?style=flat-square&logo=kubernetes)
+![Infrastructure](https://img.shields.io/badge/Orchestration-Kind/Minikube-blue?style=flat-square)
 
-Located in `docker/`, we use a segmented Compose architecture.
+</div>
 
-### Quick Commands
+## 🐳 Docker Stack
 
-```bash
-# Full stack build & launch
-docker compose -f infra/docker/docker-compose.yml up --build
+Our registry uses multi-stage builds to optimize image size and security. The stack is segmented into three primary domains: **Training**, **Serving**, and **Edge UI**.
 
-# Individual layer launch
-docker compose -f infra/docker/docker-compose.yml up inference-api
-```
+### Image Hierarchy
 
-## ☸️ Kubernetes (Local Deployment)
+| Service | Dockerfile | Exposed Port | Role |
+| :--- | :--- | :--- | :--- |
+| `training` | `Dockerfile.training` | N/A | Batch processing & Model generation. |
+| `inference-api` | `Dockerfile.inference` | 8000 | Production-grade FastAPI serving. |
+| `frontend` | `Dockerfile.frontend` | 80 | Nginx-backed static content delivery. |
 
-Located in `k8s/`, designed for use with `kind` or `minikube`.
-
-### Verification Logic
-
-We prioritize dry-run validation to ensure manifest integrity without requiring a live node.
+### Compose Management
 
 ```bash
-kubectl apply --dry-run=client -f infra/k8s/
+# Authoritative Stack Start
+docker compose -f infra/docker/docker-compose.yml up --build -d
 ```
 
-### Component Roles
+---
 
-* **namespace.yaml**: Isolates the system in the `mlops` namespace.
-* **inference-deployment.yaml**: Scales the FastAPI pod.
-* **prometheus-configmap.yaml**: Authoritative scraping config.
+## ☸️ Kubernetes Manifests
 
-## ⚠️ Known Networking Limitations
+The system is orchestrated for local clusters (`kind`, `minikube`) and is designed for zero-manual-config deployments.
 
-In Docker Compose, the API service name is `inference-api`. If you are running components outside of the Docker network (e.g., bare-metal API), you MUST update `monitoring/prometheus.yml` to target `localhost:8000`.
+### Manifest Hierarchy
+
+```mermaid
+graph TD
+    NS["namespace.yaml"] --> CF["ConfigMaps"]
+    CF --> DEPL["Deployments"]
+    DEPL --> SVC["Services (NodePort)"]
+    SVC --> ING["Ingress (Optional)"]
+```
+
+### 🛣️ NodePort Mapping (Local Access)
+
+| Component | NodePort | Access URL |
+| :--- | :--- | :--- |
+| **Frontend** | 30880 | `http://localhost:30880` |
+| **API** | 30800 | `http://localhost:30800` |
+| **Grafana** | 30300 | `http://localhost:30300` |
+
+---
+
+## 🛡️ Reliability Guarantees
+
+* **Dry-Run Enforced**: Every manifest is validated for syntax and schema integrity.
+* **Isolation**: All components reside in the `mlops` namespace to prevent resource collisions.
+* **Decoupled Config**: Monitoring targets and API environments are managed via ConfigMaps.
