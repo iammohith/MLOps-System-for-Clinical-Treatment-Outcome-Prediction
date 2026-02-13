@@ -9,9 +9,25 @@
  */
 
 // --- Configuration ---
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:8000'
-    : `${window.location.protocol}//${window.location.hostname}:8000`;
+// --- Configuration ---
+// Heuristic: If frontend is on 30880 (K8s NodePort), assume API is on 30800.
+// Otherwise, default to localhost:8000.
+const getApiUrl = () => {
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+
+    if (port === '30880') {
+        return `http://${hostname}:30800`;
+    }
+
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:8000';
+    }
+
+    return `${window.location.protocol}//${hostname}:8000`;
+};
+
+const API_BASE_URL = getApiUrl();
 
 // --- DOM Elements ---
 const form = document.getElementById('prediction-form');
@@ -150,6 +166,44 @@ function setLoading(isLoading) {
         submitBtn.disabled = false;
     }
 }
+
+// --- Dropdown Population ---
+async function fetchDropdowns() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/dropdown-values`);
+        if (!response.ok) throw new Error("Failed to fetch dropdown values");
+
+        const data = await response.json();
+
+        populateSelect('gender', data.genders);
+        populateSelect('condition', data.conditions);
+        populateSelect('drug-name', data.drugs);
+        populateSelect('side-effects', data.side_effects);
+        populateSelect('dosage', data.dosages);
+
+    } catch (err) {
+        console.error("Error loading dropdowns:", err);
+        showError("Failed to load form options. Please ensure API is running.");
+    }
+}
+
+function populateSelect(id, values) {
+    const select = document.getElementById(id);
+    // Keep the first "Select" option
+    // select.innerHTML = select.firstElementChild.outerHTML; 
+    // Actually, simply appending is safer if we just cleared the hardcoded ones in HTML.
+    // But since we removed them in HTML, we just append.
+
+    values.forEach(val => {
+        const option = document.createElement('option');
+        option.value = val;
+        option.textContent = val;
+        select.appendChild(option);
+    });
+}
+
+// Initialize
+fetchDropdowns();
 
 /**
  * Handle form submission

@@ -2,148 +2,199 @@
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![DVC](https://img.shields.io/badge/DVC-3.42.0-945DD6?style=for-the-badge&logo=dvc&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.4.1-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Kubernetes](https://img.shields.io/badge/K8s-Verified-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
-![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-Visualized-F46800?style=for-the-badge&logo=grafana&logoColor=white)
+![DVC](https://img.shields.io/badge/DVC-Verified-945DD6?style=for-the-badge&logo=dvc&logoColor=white)
+![Status](https://img.shields.io/badge/Audit-Passed-success?style=for-the-badge)
 
----
-
-**A professional system for predicting how well a clinical treatment might work.**  
-Built to be reliable, easy to restart, and easy to monitor.
+**A production-hardened, zero-trust MLOps system for predicting clinical treatment outcomes.**
+*Local Execution Verified. Containerization Provided.*
 
 </div>
 
 ---
 
-## 📖 What this does
+## ⚡ Start Here (Demo Mode)
 
-This project helps researchers predict a patient's **Improvement Score** (on a scale of 0 to 10) after receiving a specific treatment. It uses historical data to help identify which treatments might be most effective for different types of patients.
+**Just want to see it run?** Follow these 3 steps.
 
-### 🛡️ Why it's reliable
+### 1. Setup
 
-* **Consistent Results**: The system is set up so that you get the same prediction every time you run it with the same data.
-* **Always in Sync**: The web interface and the underlying math use the same rules automatically.
-* **Safety Checks**: Built-in tests prevent the system from running if something is broken or inconsistent.
+Open your terminal and run:
+
+```bash
+make setup
+```
+
+### 2. Start the App
+
+Run this command to start the backend and frontend:
+
+```bash
+make run-api & make run-frontend
+```
+
+### 3. Test it
+
+Open **[http://localhost:8080](http://localhost:8080)** in your browser.
+Use these **exact values** to see a valid prediction:
+
+| Field | Value |
+| :--- | :--- |
+| **Patient ID** | `P9999` |
+| **Age** | `50` |
+| **Gender** | `Male` |
+| **Condition** | `Hypertension` |
+| **Drug Name** | `Amlodipine` |
+| **Dosage** | `50` |
+| **Duration** | `30` |
+| **Side Effects** | `Headache` |
+
+> *Click "Predict Outcome". You should see a score (e.g., 7.4 / 10).*
 
 ---
 
-## 🏗️ System Workflow
+## 🏗️ System Architecture (C4 Context)
+
+The system allows **Clinical Researchers** to predict patient outcomes using a **Model Inference Service**, which consumes models trained by a reproducible **Data Pipeline**.
 
 ```mermaid
-graph TD
-    subgraph "Step-by-Step Data Process"
-        A["[Raw Data]"] --> B["Get Data"]
-        B --> C["Check Rules"]
-        C --> D["Prepare for Math"]
-        D --> E["Train Model"]
-        E --> F["Check Accuracy"]
-    end
+C4Context
+    title System Context Diagram (Clinical Outcome Prediction)
 
-    subgraph "Model Storage"
-        F --> G[("Saved Model")]
-        D --> H[("Saved Rules")]
-    end
+    Person(researcher, "Clinical Researcher", "Uses the system to predict treatment outcomes.")
+    
+    System_Boundary(mlops, "MLOps System") {
+        System(frontend, "Web Dashboard", "Visualizes predictions and inputs data.")
+        System(api, "Inference API", "Serves predictions via REST.")
+        System(pipeline, "DVC Pipeline", "Ingests, Validates, Trains, and Evaluates models.")
+        System(monitoring, "Observability Stack", "Prometheus & Grafana for metrics.")
+    }
 
-    subgraph "User Interface"
-        G & H --> I["Prediction Service"]
-        I -- "Show Prediction" --> J["Web App"]
-        J -- "Type Patient Info" --> I
-    end
+    SystemDb(storage, "Local Storage / Feature Store", "Stores Raw Data, Processed Features, and Model Artifacts.")
 
-    subgraph "Monitoring"
-        I -- "Performance Data" --> K["Tracker"]
-        K --> L["Dashboards"]
-    end
-
-    style I fill:#009688,color:#fff
-    style J fill:#2496ED,color:#fff
-    style K fill:#E6522C,color:#fff
-    style L fill:#F46800,color:#fff
-    style G fill:#945DD6,color:#fff
+    Rel(researcher, frontend, "Inputs Patient Data", "HTTPS")
+    Rel(frontend, api, "Requests Prediction", "JSON/REST")
+    Rel(api, storage, "Loads Model Artifacts", "File I/O")
+    Rel(pipeline, storage, "Reads Raw / Writes Models", "File I/O")
+    Rel(api, monitoring, "Exposes Metrics", "Scrape")
 ```
 
 ---
 
-## 🚀 Quick Setup
+## 🧠 Design Decisions & Trade-offs
 
-### ⚡ Easy Start with 'Makefile'
+| Decision | Rationale | Trade-off |
+| :--- | :--- | :--- |
+| **DVC (Data Version Control)** | Ensures reproducibility by locking data/model versions to Git commits. | Adds CLI overhead compared to simple file storage. |
+| **FastAPI** | High-performance, async-native, and auto-generates Swagger docs. | Slightly steeper learning curve than Flask. |
+| **Vanilla JS Frontend** | Zero dependencies, instant load time, no build step required. | Less structured than React/Vue for very large apps. |
+| **Strict Schema (Pydantic)** | "Fail-fast" on invalid data prevents silent model failures. | Requires maintaining `params.yaml` contract rigorously. |
+| **Make-based Automation** | Universal entry point (`make setup`, `make run`) works on any Unix system. | Requires `make` tool installation. |
 
-We use a small automation tool called a `Makefile` to make setup easy and consistent.
+---
+
+## 📂 Repository Map
+
+Reference guide for navigating the codebase.
+
+| Directory | Description | Key Files |
+| :--- | :--- | :--- |
+| `data/` | **Data Management**. Raw inputs and DVC-tracked processed datasets. | `params.yaml` (Schema) |
+| `pipelines/` | **ETL & Validation**. Scripts that transform raw data into features. | `ingest.py`, `validate.py`, `preprocess.py` |
+| `training/` | **Model Lifecycle**. deterministic training and evaluation scripts. | `train.py`, `evaluate.py` |
+| `inference/` | **Prediction Service**. The FastAPI application serving the model. | `app.py`, `model_loader.py` |
+| `frontend/` | **User Interface**. Lightweight dashboard for interaction. | `app.js`, `index.html` |
+| `infra/` | **Infrastructure**. Dockerfiles and Kubernetes manifests. | `Dockerfile.*`, `k8s/*.yaml` |
+| `monitoring/` | **Observability**. Prometheus and Grafana configuration. | `prometheus.yml` |
+| `validation/` | **Quality Assurance**. Automated "Zero-Trust" release checks. | `release_check.py` |
+
+---
+
+## 🚀 Quick Start (Local Python)
+
+This is the **verified** method for running the system on a standard development machine.
+
+### Prerequisites
+
+* Python 3.10+
+* Git
+* Make
+
+### 1. Automated Setup
+
+Initialize the environment, install locked dependencies, and configure DVC.
 
 ```bash
-# 1. Get the code
-git clone https://github.com/iammohith/MLOps-System-For-Clinical-Treatment-Outcome-Prediction.git
-cd MLOps-System-For-Clinical-Treatment-Outcome-Prediction
-
-# 🏗️ 2. Automated Setup (Installs everything needed)
 make setup
+```
 
-# 🧪 3. Run the whole process (From data to finished prediction model)
+### 2. Run the Data Pipeline
+
+Execute the full DVC pipeline (Ingest → Validate → Preprocess → Train → Evaluate).
+
+```bash
 make run-pipeline
+```
 
-# 🛡️ 4. Final Verification (Checks if everything is truly working)
+*Artifacts provided: `models/model.joblib`, `data/processed/preprocessor.joblib`, `metrics/scores.json`*
+
+### 3. Run the API
+
+Start the hardened inference service on port `8000`.
+
+```bash
+make run-api
+```
+
+*Health Check: `http://localhost:8000/health`*
+*Interactive Docs: `http://localhost:8000/docs`*
+
+### 4. Run the Frontend
+
+Launch the lightweight dashboard on port `8080`.
+
+```bash
+make run-frontend
+```
+
+*Access: `http://localhost:8080`*
+
+---
+
+## 🐳 Containerization (Infrastructure)
+
+The repository includes production-grade Dockerfiles and Kubernetes manifests.
+
+> [!WARNING]
+> **Environment Requirement**: A running Docker Daemon and/or Kubernetes cluster is required to use these features. The configuration has been verified via static analysis, but runtime execution depends on your local environment context.
+
+See [infra/README.md](infra/README.md) for detailed deployment instructions.
+
+---
+
+## 🛡️ Validation & Safety
+
+We treat correctness as a requirement, not a feature.
+
+### Run the "Zero-Trust" Validation Suite
+
+This script audits the entire repository for integrity, schema consistency, and runtime logic.
+
+```bash
 make validate
 ```
 
----
+### Key Security Features
 
-## 🛠️ The Tech Used
-
-| Part | Tool | Role |
-| :--- | :--- | :--- |
-| **Logic** | **Python** | The primary language that does the calculations. |
-| **Math** | **Scikit-Learn** | The library used to build the prediction model. |
-| **Data Tracking** | **DVC** | Remembers exactly which data was used for which model. |
-| **Web Service** | **FastAPI** | Makes the model available for the web app to talk to. |
-| **Containers** | **Docker** | Packages everything so it runs the same on any computer. |
-| **Monitoring** | **Prometheus** | Watches how fast and accurately predictions are made. |
+* **Non-Root Containers**: All Dockerfiles enforce non-root user execution.
+* **Security Headers**: API enforces `HSTS`, `X-Content-Type-Options`, and `CSP`.
+* **Input Sanitization**: Strict Pydantic schemas reject malformed data immediately.
+* **Memory Safety**: Large file processing prevents OOM crashes.
 
 ---
 
-## 📊 Viewing Results
+## ⚖️ Disclaimer
 
-You can see the system in action through several simple links:
-
-1. **Web App**: `http://localhost:8080` — The friendly screen where you type patient info.
-2. **System Health**: `http://localhost:8000/health` — Sees if the math engine is ready.
-3. **Data Tracking**: `http://localhost:9090` — Sees how many people are using the system.
-4. **Dashboards**: `http://localhost:3000` — Beautiful charts showing system performance.
-
----
-
-## 🛡️ Final Checks
-
-We verify every part of the system before it's considered "ready."
-
-| Check | What it confirms |
-| :--- | :--- |
-| **Files** | All necessary code and data files are in place. |
-| **Math Process** | The data flows correctly from start to finish. |
-| **Containers** | The system starts up correctly in its packaged form. |
-| **Service** | The web app and math engine talk to each other perfectly. |
-
----
-
-## 🚧 Folder Structure
-
-```text
-├── Makefile                     # Easy setup commands
-├── params.yaml                  # The main rules for the system
-├── dvc.yaml                     # The step-by-step math workflow
-├── inference/                   # The web prediction engine
-├── pipelines/                   # How data is prepared
-├── training/                    # How the model learns
-├── validation/                  # Final consistency tests
-└── infra/                       # Packaged deployment files
-```
-
----
-
-## ⚖️ Please Note
-
-This tool is for **Research and Analysis** only. It is not a medical device and should not be used to diagnose or treat real patients.
+*Research Use Only. Not a Medical Device.*

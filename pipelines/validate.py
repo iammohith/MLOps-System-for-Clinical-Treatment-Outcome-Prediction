@@ -9,13 +9,26 @@ Hard-fails on any schema violation.
 import os
 import sys
 import yaml
+import logging
 import pandas as pd
+
+# --- Logging Configuration ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger("validate")
 
 
 def load_params():
     """Load pipeline parameters from params.yaml."""
-    with open("params.yaml", "r") as f:
-        return yaml.safe_load(f)
+    try:
+        with open("params.yaml", "r") as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        logger.error(f"Failed to load params.yaml: {e}")
+        sys.exit(1)
 
 
 def validate_schema(df, schema):
@@ -41,7 +54,7 @@ def validate_schema(df, schema):
 
     # --- Check Patient_ID format ---
     if "Patient_ID" in df.columns:
-        invalid_ids = df[~df["Patient_ID"].str.match(r"^P\d+$")]
+        invalid_ids = df[~df["Patient_ID"].astype(str).str.match(r"^P\d+$")]
         if len(invalid_ids) > 0:
             errors.append(
                 f"Invalid Patient_ID format (expected P followed by digits): "
@@ -125,6 +138,7 @@ def validate_schema(df, schema):
 
 
 def main():
+    logger.info("Starting data validation...")
     params = load_params()
     processed_dir = params["data"]["processed_dir"]
     schema = params["schema"]
@@ -134,26 +148,39 @@ def main():
 
     # --- Load data ---
     if not os.path.exists(input_path):
-        print(f"ERROR: Input file not found: {input_path}")
+        logger.error(f"Input file not found: {input_path}")
         sys.exit(1)
 
-    df = pd.read_csv(input_path)
-    print(f"Validating {len(df)} rows, {len(df.columns)} columns...")
+    try:
+        df = pd.read_csv(input_path)
+    except Exception as e:
+        logger.error(f"Failed to read CSV: {e}")
+        sys.exit(1)
+        
+    logger.info(f"Validating {len(df)} rows, {len(df.columns)} columns...")
 
     # --- Run validation ---
-    errors = validate_schema(df, schema)
+    try:
+        errors = validate_schema(df, schema)
+    except Exception as e:
+        logger.error(f"Validation logic error: {e}")
+        sys.exit(1)
 
     if errors:
-        print("\n✗ VALIDATION FAILED:")
+        logger.error("VALIDATION FAILED:")
         for i, error in enumerate(errors, 1):
-            print(f"  {i}. {error}")
+            logger.error(f"  {i}. {error}")
         sys.exit(1)
 
     # --- Save validated data ---
-    df.to_csv(output_path, index=False)
+    try:
+        df.to_csv(output_path, index=False)
+    except IOError as e:
+        logger.error(f"Failed to save validated CSV: {e}")
+        sys.exit(1)
 
-    print(f"✓ Validation passed: {len(df)} rows, all schema checks OK")
-    print(f"  Output: {output_path}")
+    logger.info(f"Validation passed: {len(df)} rows, all schema checks OK")
+    logger.info(f"Output: {output_path}")
 
 
 if __name__ == "__main__":

@@ -13,13 +13,12 @@ from typing import ClassVar
 # This ensures API validation is always in sync with the data pipeline config.
 PARAMS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "params.yaml")
 
-try:
-    with open(PARAMS_PATH, "r") as f:
-        _params = yaml.safe_load(f)
-        _schema = _params["schema"]
-except Exception:
-    # Fallback to empty if file missing (e.g. during build stages)
-    _schema = {}
+if not os.path.exists(PARAMS_PATH):
+    raise FileNotFoundError(f"Config file not found: {PARAMS_PATH}")
+
+with open(PARAMS_PATH, "r") as f:
+    _params = yaml.safe_load(f)
+    _schema = _params["schema"]
 
 VALID_GENDERS = _schema.get("gender_values", [])
 VALID_CONDITIONS = _schema.get("condition_values", [])

@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinical Treatment Outcome Prediction</title>
-    <meta name="description" content="ML-powered prediction system for clinical treatment outcome scores. Supports research, quality analysis, and exploratory analytics.">
+    <meta name="description"
+        content="ML-powered prediction system for clinical treatment outcome scores. Supports research, quality analysis, and exploratory analytics.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Header -->
@@ -17,12 +20,13 @@
             <div class="header-content">
                 <div class="logo">
                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <circle cx="16" cy="16" r="14" stroke="url(#grad)" stroke-width="2.5" fill="none"/>
-                        <path d="M10 16h4l2-6 4 12 2-6h4" stroke="url(#grad)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="16" cy="16" r="14" stroke="url(#grad)" stroke-width="2.5" fill="none" />
+                        <path d="M10 16h4l2-6 4 12 2-6h4" stroke="url(#grad)" stroke-width="2" fill="none"
+                            stroke-linecap="round" stroke-linejoin="round" />
                         <defs>
                             <linearGradient id="grad" x1="0" y1="0" x2="32" y2="32">
-                                <stop offset="0%" stop-color="#6366f1"/>
-                                <stop offset="100%" stop-color="#06b6d4"/>
+                                <stop offset="0%" stop-color="#6366f1" />
+                                <stop offset="100%" stop-color="#06b6d4" />
                             </linearGradient>
                         </defs>
                     </svg>
@@ -37,11 +41,13 @@
             <!-- Disclaimer Banner -->
             <div class="disclaimer-banner">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="8" x2="12" y2="12"/>
-                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
-                <p>This system predicts patient treatment outcome scores to support clinical research, quality analysis, and exploratory analytics. It does <strong>not</strong> provide diagnostic or treatment recommendations.</p>
+                <p>This system predicts patient treatment outcome scores to support clinical research, quality analysis,
+                    and exploratory analytics. It does <strong>not</strong> provide diagnostic or treatment
+                    recommendations.</p>
             </div>
 
             <div class="content-grid">
@@ -63,7 +69,7 @@
                             <!-- Age -->
                             <div class="form-group">
                                 <label for="age">Age</label>
-                                <input type="number" id="age" min="0" max="100" placeholder="18-100" required>
+                                <input type="number" id="age" min="18" max="79" placeholder="18-79" required>
                             </div>
 
                             <!-- Gender -->
@@ -71,8 +77,6 @@
                                 <label for="gender">Gender</label>
                                 <select id="gender" required>
                                     <option value="" disabled selected>Select</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Male">Male</option>
                                 </select>
                             </div>
 
@@ -81,11 +85,6 @@
                                 <label for="condition">Condition</label>
                                 <select id="condition" required>
                                     <option value="" disabled selected>Select</option>
-                                    <option value="Depression">Depression</option>
-                                    <option value="Diabetes">Diabetes</option>
-                                    <option value="Hypertension">Hypertension</option>
-                                    <option value="Infection">Infection</option>
-                                    <option value="Pain Relief">Pain Relief</option>
                                 </select>
                             </div>
 
@@ -94,21 +93,6 @@
                                 <label for="drug-name">Drug Name</label>
                                 <select id="drug-name" required>
                                     <option value="" disabled selected>Select</option>
-                                    <option value="Amlodipine">Amlodipine</option>
-                                    <option value="Amoxicillin">Amoxicillin</option>
-                                    <option value="Azithromycin">Azithromycin</option>
-                                    <option value="Bupropion">Bupropion</option>
-                                    <option value="Ciprofloxacin">Ciprofloxacin</option>
-                                    <option value="Escitalopram">Escitalopram</option>
-                                    <option value="Glipizide">Glipizide</option>
-                                    <option value="Ibuprofen">Ibuprofen</option>
-                                    <option value="Insulin Glargine">Insulin Glargine</option>
-                                    <option value="Losartan">Losartan</option>
-                                    <option value="Metformin">Metformin</option>
-                                    <option value="Metoprolol">Metoprolol</option>
-                                    <option value="Paracetamol">Paracetamol</option>
-                                    <option value="Sertraline">Sertraline</option>
-                                    <option value="Tramadol">Tramadol</option>
                                 </select>
                             </div>
 
@@ -117,18 +101,13 @@
                                 <label for="dosage">Dosage (mg)</label>
                                 <select id="dosage" required>
                                     <option value="" disabled selected>Select</option>
-                                    <option value="50">50 mg</option>
-                                    <option value="100">100 mg</option>
-                                    <option value="250">250 mg</option>
-                                    <option value="500">500 mg</option>
-                                    <option value="850">850 mg</option>
                                 </select>
                             </div>
 
                             <!-- Treatment Duration -->
                             <div class="form-group">
                                 <label for="duration">Treatment Duration (days)</label>
-                                <input type="number" id="duration" min="1" placeholder="e.g. 30" required>
+                                <input type="number" id="duration" min="5" max="59" placeholder="5-59" required>
                             </div>
 
                             <!-- Side Effects -->
@@ -136,36 +115,6 @@
                                 <label for="side-effects">Side Effects</label>
                                 <select id="side-effects" required>
                                     <option value="" disabled selected>Select reported side effect</option>
-                                    <option value="Abdominal pain">Abdominal pain</option>
-                                    <option value="Allergy">Allergy</option>
-                                    <option value="Anxiety">Anxiety</option>
-                                    <option value="Back pain">Back pain</option>
-                                    <option value="Constipation">Constipation</option>
-                                    <option value="Cough">Cough</option>
-                                    <option value="Diarrhea">Diarrhea</option>
-                                    <option value="Dizziness">Dizziness</option>
-                                    <option value="Drowsiness">Drowsiness</option>
-                                    <option value="Dry mouth">Dry mouth</option>
-                                    <option value="Fatigue">Fatigue</option>
-                                    <option value="Headache">Headache</option>
-                                    <option value="Heartburn">Heartburn</option>
-                                    <option value="Injection site pain">Injection site pain</option>
-                                    <option value="Insomnia">Insomnia</option>
-                                    <option value="Joint pain">Joint pain</option>
-                                    <option value="Liver issues">Liver issues</option>
-                                    <option value="Low blood sugar">Low blood sugar</option>
-                                    <option value="Low sugar">Low sugar</option>
-                                    <option value="Nausea">Nausea</option>
-                                    <option value="Rash">Rash</option>
-                                    <option value="Skin rash">Skin rash</option>
-                                    <option value="Sleep issues">Sleep issues</option>
-                                    <option value="Slow heartbeat">Slow heartbeat</option>
-                                    <option value="Stomach pain">Stomach pain</option>
-                                    <option value="Stomach upset">Stomach upset</option>
-                                    <option value="Sweating">Sweating</option>
-                                    <option value="Swelling">Swelling</option>
-                                    <option value="Tiredness">Tiredness</option>
-                                    <option value="Weight gain">Weight gain</option>
                                 </select>
                             </div>
                         </div>
@@ -187,8 +136,8 @@
                     <!-- Empty State -->
                     <div class="empty-state" id="empty-state">
                         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                            <circle cx="32" cy="32" r="28" stroke="#334155" stroke-width="2" stroke-dasharray="4 4"/>
-                            <path d="M24 32h16M32 24v16" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="32" cy="32" r="28" stroke="#334155" stroke-width="2" stroke-dasharray="4 4" />
+                            <path d="M24 32h16M32 24v16" stroke="#475569" stroke-width="2" stroke-linecap="round" />
                         </svg>
                         <p>Fill in the form and click <strong>Predict Outcome</strong> to see the result</p>
                     </div>
@@ -206,14 +155,13 @@
                             <svg class="score-circle" viewBox="0 0 200 200">
                                 <defs>
                                     <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" id="grad-stop-1" stop-color="#6366f1"/>
-                                        <stop offset="100%" id="grad-stop-2" stop-color="#06b6d4"/>
+                                        <stop offset="0%" id="grad-stop-1" stop-color="#6366f1" />
+                                        <stop offset="100%" id="grad-stop-2" stop-color="#06b6d4" />
                                     </linearGradient>
                                 </defs>
-                                <circle cx="100" cy="100" r="85" class="circle-bg"/>
+                                <circle cx="100" cy="100" r="85" class="circle-bg" />
                                 <circle cx="100" cy="100" r="85" class="circle-progress" id="circle-progress"
-                                    stroke-dasharray="534.07"
-                                    stroke-dashoffset="534.07"/>
+                                    stroke-dasharray="534.07" stroke-dashoffset="534.07" />
                             </svg>
                             <div class="score-value">
                                 <span class="score-number" id="score-number">0.0</span>
@@ -239,8 +187,9 @@
                     <!-- Error State -->
                     <div class="error-state" id="error-state" style="display:none;">
                         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                            <circle cx="24" cy="24" r="20" stroke="#ef4444" stroke-width="2"/>
-                            <path d="M16 16l16 16M32 16L16 32" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="24" cy="24" r="20" stroke="#ef4444" stroke-width="2" />
+                            <path d="M16 16l16 16M32 16L16 32" stroke="#ef4444" stroke-width="2"
+                                stroke-linecap="round" />
                         </svg>
                         <p class="error-message" id="error-message">An error occurred</p>
                     </div>
@@ -250,10 +199,11 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p>&copy; 2025 Clinical Treatment Outcome Prediction — For research use only</p>
+            <p>&copy; 2026 Clinical Treatment Outcome Prediction — For research use only</p>
         </footer>
     </div>
 
     <script src="app.js"></script>
 </body>
+
 </html>

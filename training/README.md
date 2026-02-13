@@ -1,64 +1,98 @@
-# 🧠 Patient Outcome Learning
+# 🧠 Model Training
 
 <div align="center">
 
-![Math](https://img.shields.io/badge/Method-RandomForest-F7931E?style=flat-square&logo=scikit-learn)
-![Consistency](https://img.shields.io/badge/Consistency-Guaranteed-blue?style=flat-square)
+![Scikit-Learn](https://img.shields.io/badge/Model-RandomForest-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![Reproducibility](https://img.shields.io/badge/Seed-Fixed-success?style=for-the-badge)
+
+**Deterministic model training pipeline.**
+*Verified for local execution.*
+
+[⬅️ Back to Root](../README.md)
 
 </div>
 
-## 🧬 Consistency Rules
-
-The system is designed to learn from data in a predictable way. This means that if you train it twice on the same data, you will get the exact same results every time.
-
-### Saving the Results
-
-When the learning process finishes, it saves two important files:
-
-1. **The Learnings** (`models/model.joblib`): What the system has discovered about treatment results.
-2. **The Recipe** (`data/processed/preprocessor.joblib`): How to prepare new patient data so the system can understand it.
-
 ---
 
-## 🏃 How it works
+## 🔬 Experiment Tracking Flow
+
+The training process is designed to be **auditable** and **reproduceable**.
 
 ```mermaid
-graph LR
-    X["Patient Data"] --> FIT["Learning Process"]
-    Y["Outcomes"] --> FIT
-    FIT --> ART["Saved Model"]
-    ART --> EVAL["Final Test"]
-    EVAL --> METRICS["Accuracy Score"]
+sequenceDiagram
+    participant Params as params.yaml
+    participant Train as train.py
+    participant Model as RandomForest
+    participant Eval as evaluate.py
+    participant Metrics as metrics/scores.json
+
+    Params->>Train: Load Hyperparams (n_estimators, depth)
+    Params->>Train: Load Random Seed (42)
+    Train->>Model: Initialize Model (Fixed Seed)
+    Train->>Model: Fit(X_train, y_train)
+    Model-->>Train: Trained Artifact
+    Train->>Eval: Pass Model
+    Eval->>Model: Predict(X_test)
+    Model-->>Eval: y_pred
+    Eval->>Metrics: Write RMSE, MAE, R2
 ```
 
-### Commands
+---
+
+## 🧠 Design Decisions
+
+| Decision | Rationale |
+| :--- | :--- |
+| **Random Forest** | Robust to outliers, handles non-linear relationships well, and interpretable via feature importance. Good baseline choice. |
+| **Fixed Random Seed** | We set `random_state=42` explicitly. This ensures that if you run `dvc repro` twice, you get the *byte-for-byte exact same* model. |
+| **Pinned Dependencies** | `requirements.txt` locks `scikit-learn` version. A model trained on v1.4.1 might behave differently on v1.5.0. |
+| **Resource Limits** | `n_jobs` defaults to 1 but can be overridden. This prevents the training script from creating 100 threads on a shared Kubernetes node. |
+
+---
+
+## 🚀 How to Train
+
+The training stage is part of the DVC pipeline:
 
 ```bash
-# Start the learning process
 dvc repro train
+```
 
-# Test how accurate it is
-dvc repro evaluate
+### Artifacts Produced
+
+* `models/model.joblib`: The trained Random Forest model.
+* `metrics/scores.json`: Performance metrics (RMSE, MAE, R²).
+
+---
+
+## ⚙️ Configuration
+
+Hyperparameters are managed in `params.yaml`:
+
+```yaml
+model:
+  n_estimators: 200
+  max_depth: 15
+  min_samples_split: 5
+  min_samples_leaf: 2
 ```
 
 ---
 
-## 📋 How we measure success
+## 📁 Directory Manifest
 
-We use three standard ways to check if our predictions are accurate:
-
-| Metric | Goal | Simple Explanation |
-| :--- | :--- | :--- |
-| **Error Margin** | Low | How close the prediction is to the actual result. |
-| **Consistency** | High | How well the system handles different types of patients. |
-| **Reliability** | High | Percentage of results that follow the predicted pattern. |
+| File | Description |
+| :--- | :--- |
+| `train.py` | Main training logic. Loads data, trains model, saves `.joblib`. |
+| `evaluate.py` | Evaluation logic. Loads model/test data, calculates metrics. |
+| `__init__.py` | Package marker. |
 
 ---
 
-## 🛠️ System Settings
+## ❓ Troubleshooting
 
-We have pre-configured the system with settings that work best for this clinical data. These are stored safely in `params.yaml`.
-
-## 🧪 Advanced Tuning
-
-For advanced users, we provide a script (`training/tune.py`) that tries thousands of different setting combinations to find the absolute most accurate configuration possible.
+| Issue | Cause | Fix |
+| :--- | :--- | :--- |
+| `ValueError: Input contains NaN` | Preprocessing failed to handle missing values. | Check `pipelines/preprocess.py` logic. |
+| `Low Accuracy (R2 < 0.5)` | Model underfitting or data insufficient. | Try increasing `n_estimators` in `params.yaml`. |
+| `Training is slow` | Execution is single-threaded. | `export N_JOBS=-1` (Local only! Do not do this in Prod). |

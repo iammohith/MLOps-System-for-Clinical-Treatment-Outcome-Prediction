@@ -41,6 +41,14 @@ run-pipeline: install
 validate: install
 	. $(VENV_DIR)/bin/activate && python validation/release_check.py
 
+
+run-api: install
+	. $(VENV_DIR)/bin/activate && python -m uvicorn inference.app:app --host 0.0.0.0 --port 8000 --reload
+
+run-frontend:
+	@echo "Starting frontend at http://localhost:8080..."
+	cd frontend && $(PYTHON) -m http.server 8080
+
 clean:
 	rm -rf $(VENV_DIR)
 	rm -rf __pycache__

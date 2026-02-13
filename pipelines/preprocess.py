@@ -11,6 +11,7 @@ Stage 3: Data Preprocessing
 import os
 import sys
 import yaml
+import logging
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -19,29 +20,52 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 import joblib
 
+# --- Logging Configuration ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger("preprocess")
+
 
 def load_params():
     """Load pipeline parameters from params.yaml."""
-    with open("params.yaml", "r") as f:
-        return yaml.safe_load(f)
+    try:
+        with open("params.yaml", "r") as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        logger.error(f"Failed to load params.yaml: {e}")
+        sys.exit(1)
 
 
 def main():
+    logger.info("Starting data preprocessing...")
     params = load_params()
-    processed_dir = params["data"]["processed_dir"]
-    random_seed = params["random_seed"]
-    test_split = params["test_split"]
-    features = params["features"]
+    
+    try:
+        processed_dir = params["data"]["processed_dir"]
+        random_seed = params["random_seed"]
+        test_split = params["test_split"]
+        features = params["features"]
+    except KeyError as e:
+        logger.error(f"Missing param: {e}")
+        sys.exit(1)
 
     input_path = os.path.join(processed_dir, "validated.csv")
 
     # --- Load data ---
     if not os.path.exists(input_path):
-        print(f"ERROR: Input file not found: {input_path}")
+        logger.error(f"Input file not found: {input_path}")
         sys.exit(1)
 
-    df = pd.read_csv(input_path)
-    print(f"Preprocessing {len(df)} rows...")
+    try:
+        df = pd.read_csv(input_path)
+    except Exception as e:
+        logger.error(f"Failed to read CSV: {e}")
+        sys.exit(1)
+
+    logger.info(f"Preprocessing {len(df)} rows...")
 
     # --- Separate target and features ---
     target_col = features["target"]
@@ -57,6 +81,10 @@ def main():
         steps=[("scaler", StandardScaler())]
     )
 
+    # STRICT: handle_unknown='error'
+    # This ensures that we don't silently ignore new categories in production.
+    # If the model encounters a new drug/condition, it should fail rather than 
+    # produce a potentially dangerous prediction based on default values.
     categorical_transformer = Pipeline(
         steps=[("onehot", OneHotEncoder(handle_unknown="error", sparse_output=False))]
     )
@@ -75,8 +103,12 @@ def main():
     )
 
     # --- Fit preprocessor on training data only ---
-    X_train_processed = preprocessor.fit_transform(X_train)
-    X_test_processed = preprocessor.transform(X_test)
+    try:
+        X_train_processed = preprocessor.fit_transform(X_train)
+        X_test_processed = preprocessor.transform(X_test)
+    except Exception as e:
+        logger.error(f"Preprocessing failed: {e}")
+        sys.exit(1)
 
     # --- Get feature names after transformation ---
     feature_names = (
@@ -87,28 +119,32 @@ def main():
     )
 
     # --- Save processed data ---
-    pd.DataFrame(X_train_processed, columns=feature_names).to_csv(
-        os.path.join(processed_dir, "X_train.csv"), index=False
-    )
-    pd.DataFrame(X_test_processed, columns=feature_names).to_csv(
-        os.path.join(processed_dir, "X_test.csv"), index=False
-    )
-    pd.DataFrame(y_train, columns=[target_col]).to_csv(
-        os.path.join(processed_dir, "y_train.csv"), index=False
-    )
-    pd.DataFrame(y_test, columns=[target_col]).to_csv(
-        os.path.join(processed_dir, "y_test.csv"), index=False
-    )
+    try:
+        pd.DataFrame(X_train_processed, columns=feature_names).to_csv(
+            os.path.join(processed_dir, "X_train.csv"), index=False
+        )
+        pd.DataFrame(X_test_processed, columns=feature_names).to_csv(
+            os.path.join(processed_dir, "X_test.csv"), index=False
+        )
+        pd.DataFrame(y_train, columns=[target_col]).to_csv(
+            os.path.join(processed_dir, "y_train.csv"), index=False
+        )
+        pd.DataFrame(y_test, columns=[target_col]).to_csv(
+            os.path.join(processed_dir, "y_test.csv"), index=False
+        )
 
-    # --- Save preprocessor ---
-    preprocessor_path = os.path.join(processed_dir, "preprocessor.joblib")
-    joblib.dump(preprocessor, preprocessor_path)
+        # --- Save preprocessor ---
+        preprocessor_path = os.path.join(processed_dir, "preprocessor.joblib")
+        joblib.dump(preprocessor, preprocessor_path)
+    except Exception as e:
+        logger.error(f"Failed to save processed data/artifacts: {e}")
+        sys.exit(1)
 
-    print(f"✓ Preprocessing complete:")
-    print(f"  Train set: {X_train_processed.shape[0]} rows, {X_train_processed.shape[1]} features")
-    print(f"  Test set: {X_test_processed.shape[0]} rows, {X_test_processed.shape[1]} features")
-    print(f"  Feature names: {feature_names}")
-    print(f"  Preprocessor saved: {preprocessor_path}")
+    logger.info(f"Preprocessing complete:")
+    logger.info(f"  Train set: {X_train_processed.shape[0]} rows, {X_train_processed.shape[1]} features")
+    logger.info(f"  Test set: {X_test_processed.shape[0]} rows, {X_test_processed.shape[1]} features")
+    logger.info(f"  Feature names: {feature_names}")
+    logger.info(f"  Preprocessor saved: {preprocessor_path}")
 
 
 if __name__ == "__main__":

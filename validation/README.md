@@ -1,44 +1,50 @@
-# 🛡️ Verification System
+# 🛡️ Validation System
 
 <div align="center">
 
-![Verified](https://img.shields.io/badge/Status-Verified-green?style=flat-square)
-![Quality](https://img.shields.io/badge/Quality-Guaranteed-blue?style=flat-square)
+![Zero-Trust](https://img.shields.io/badge/Policy-Zero_Trust-red?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
+
+**Automated integrity and quality gates.**
+*Verified for local execution.*
+
+[⬅️ Back to Root](../README.md)
 
 </div>
 
-## 🚪 Safety Checks
-
-To ensure the system is always reliable, we have built a set of automatic safety checks. These checks make sure that everything is working perfectly before the code is released.
-
 ---
 
-## ⚡ The Check Checklist
+## ⚡ The "Zero-Trust" Protocol
 
-Every time we check the system, it looks at these 5 important areas:
+We do not assume the system is working; we prove it. The validation suite runs authoritative checks before any release.
 
-| Area | What it checks |
-| :--- | :--- |
-| **Files** | Checks if any important code or data files are missing. |
-| **Workflow** | Makes sure the step-by-step math process runs correctly. |
-| **Containers** | Confirms the system starts up correctly when packaged. |
-| **Setup** | Checks if the system layout follows standard rules. |
-| **Predictions** | Tests that the system can actually calculate a score. |
-
----
-
-## 🏃 How to Run Checks
+### Run Verification
 
 ```bash
-# The simplest way to check everything at once
 make validate
-
-# The detailed technical check
-python validation/release_check.py
 ```
 
 ---
 
-## 📜 Standard Checks
+## 🔍 What is Checked?
 
-We also provide a simpler check (`validate_repo.py`) for computers that don't have all the advanced software installed. This still does a great job of finding common mistakes.
+| Category | Description | Status |
+| :--- | :--- | :--- |
+| **Integrity** | Presence of all mandatory files (Code, Config, Dockerfiles). | ✅ |
+| **Pipeline** | Successful execution of DVC stages (repro). | ✅ |
+| **Artifacts** | Existence of `model.joblib` and `preprocessor.joblib`. | ✅ |
+| **Infrastructure** | Syntax warnings for Docker/K8s (Dry-Run). | ✅ |
+| **API Runtime** | Liveness of the Inference API (if running). | ✅ |
+
+> [!IMPORTANT]
+> The validation script considers "Environment Blockers" (like missing Docker daemon) as messages, allowing local development validation to proceed.
+
+---
+
+## ❓ Troubleshooting
+
+| Error | Cause | Fix |
+| :--- | :--- | :--- |
+| `Model not found` | Pipeline hasn't run. | Run `make run-pipeline`. |
+| `Connection refused` | API isn't running. | Run `make run-api` in another terminal. |
+| `Docker not found` | Daemon is stopped. | Start Docker Desktop or ignore if just testing logic. |

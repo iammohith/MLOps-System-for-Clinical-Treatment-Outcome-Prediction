@@ -1,61 +1,107 @@
-# 🏗️ Step-by-Step Workflow
+# 🏗️ Data Pipelines
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/Language-Python-3776AB?style=flat-square&logo=python)
-![DVC](https://img.shields.io/badge/Workflow-DVC-945DD6?style=flat-square&logo=dvc)
+![DVC](https://img.shields.io/badge/DVC-Pipeline-945DD6?style=for-the-badge&logo=dvc&logoColor=white)
+![Python](https://img.shields.io/badge/Python-Verified-3776AB?style=for-the-badge&logo=python&logoColor=white)
+
+**Reproducible, step-by-step data processing.**
+*Verified for local execution.*
+
+[⬅️ Back to Root](../README.md)
 
 </div>
 
-## 🛣️ Workflow Overview
+---
 
-Our workflow is organized into logical steps. If you change a small part of the data, the system automatically knows which steps need to be re-run to keep everything up to date.
+## 🛤️ Execution Flow (DAG)
+
+The pipeline is defined in `dvc.yaml` and executes in verified stages. This Direct Acyclic Graph (DAG) ensures that if `Ingest` fails, `Train` never runs.
 
 ```mermaid
 graph TD
-    A["Original Data"] --> B["Step 1: Get Data"]
-    B --> C["Step 2: Check Rules"]
-    C --> D["Step 3: Prepare for Math"]
-    D --> E["Step 4: Learn Patterns"]
-    E --> F["Step 5: Check Accuracy"]
-
-    subgraph "Quality Check"
-        F -- "Score Check" --> G{"Is it accurate?"}
-        G -- "Yes" --> H["Ready for Use"]
+    subgraph "Safety Checks"
+        Ingest[("Ingest\n(Safe Read & Copy)")] --> Validate[("Validate\n(Schema & Range Check)")]
     end
+
+    subgraph "Transformation"
+        Validate --> Preprocess[("Preprocess\n(OneHot & Scaling)")]
+    end
+
+    subgraph "Modeling"
+        Preprocess --> Train[("Train Model\n(RandomForest)")]
+        Train --> Evaluate[("Evaluate\n(RMSE/R2 Metrics)")]
+    end
+    
+    style Ingest fill:#e1f5fe,stroke:#01579b
+    style Validate fill:#fff9c4,stroke:#fbc02d
+    style Preprocess fill:#e8f5e9,stroke:#2e7d32
 ```
 
 ---
 
-## 🔬 What happens at each step?
+## 🧠 Design Decisions
 
-### 1️⃣ Get Data (`ingest.py`)
-
-This step finds the original patient data and moves it into a workspace while checking that no data is missing.
-
-### 2️⃣ Check Rules (`validate.py`)
-
-This step makes sure every patient record makes sense. For example, it checks if ages are within expected ranges.
-
-### 3️⃣ Prepare for Math (`preprocess.py`)
-
-This step translates medical terms (like drug names) into numbers that the prediction model can understand.
+| Pattern | Rationale |
+| :--- | :--- |
+| **Fail-Fast Validation** | The `validate.py` stage runs *before* preprocessing. If data is bad, we crash early. This saves compute resources. |
+| **Constant Memory** | `ingest.py` uses chunked reading (or `nrows` sampling for checks) to ensure we can handle datasets larger than RAM. |
+| **Artifact separation** | We save `preprocessor.joblib` separate from `model.joblib`. This allows the Inference API to apply the *exact same* transformations to new data. |
+| **Atomic Stages** | Each script does exactly one thing. This makes debugging easier ("Did it fail at Ingest or Train?"). |
 
 ---
 
-## 🏃 Running the Workflow
+## 🚀 How to Run
+
+### Execute Full Pipeline
+
+Re-runs any steps where dependencies (code or data) have changed.
 
 ```bash
-# Run the whole workflow from start to finish
 dvc repro
-
-# See a picture of the steps
-dvc dag
 ```
+
+*Or use `make run-pipeline` for a clean environment run.*
 
 ---
 
-## 🛡️ Reliability Features
+## 🔬 Stage Details
 
-* **Central Rules**: All steps use the same rulebook (`params.yaml`).
-* **Smart Skipping**: If nothing has changed, the system is smart enough to skip steps to save time.
+### 1. Ingest (`pipelines/ingest.py`)
+
+* **Input**: `data/raw/real_drug_dataset.csv`
+* **Action**: Copies data to workspace, validating file integrity.
+* **Safety**: Uses constant-memory checks.
+
+### 2. Validate (`pipelines/validate.py`)
+
+* **Input**: `data/processed/ingested.csv`
+* **Action**: Enforces `params.yaml` schema (Ranges, Types, Categories).
+* **Behavior**: Fail-fast. Any schema violation stops the pipeline immediately.
+
+### 3. Preprocess (`pipelines/preprocess.py`)
+
+* **Input**: `data/processed/clean_data.csv`
+* **Action**: One-hot encoding, Scaling, Train/Test split.
+* **Artifacts**: Saves `preprocessor.joblib`.
+
+---
+
+## 📁 Directory Manifest
+
+| File | Description |
+| :--- | :--- |
+| `ingest.py` | Initial data loader. |
+| `validate.py` | Schema enforcement logic. |
+| `preprocess.py` | Feature engineering logic. |
+| `__init__.py` | Makes directory a Python package. |
+
+---
+
+## ❓ Troubleshooting
+
+| Error | Cause | Fix |
+| :--- | :--- | :--- |
+| `Stage 'ingest' cmd failed` | Input file missing or locked. | Check `data/raw` exists and is readable. |
+| `SchemaViolationError` | Data contains values not in `params.yaml`. | Fix the raw data or update the allowed values in `params.yaml`. |
+| `MemoryError` | Dataset too large for pandas. | Increase RAM or optimize `ingest.py` to use `dask`/`chunksize`. |

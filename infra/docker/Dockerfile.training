@@ -28,5 +28,5 @@ RUN mkdir -p data/processed models metrics && \
 
 USER appuser
 
-# Default: run the full DVC pipeline stages manually
-CMD ["python", "pipelines/ingest.py"]
+# Default: run the full DVC pipeline
+CMD ["dvc", "repro"]

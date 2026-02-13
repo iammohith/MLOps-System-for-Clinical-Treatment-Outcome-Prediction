@@ -1,39 +1,32 @@
-# 📚 Documentation Center
+# 📚 Documentation
 
 <div align="center">
 
-![Format](https://img.shields.io/badge/Format-Markdown-blue?style=flat-square&logo=markdown)
-![Interface](https://img.shields.io/badge/Docs-Interactive-green?style=flat-square)
+![Type](https://img.shields.io/badge/Type-Technical-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Current-success?style=for-the-badge)
+
+**Central hub for system documentation and future planning.**
 
 </div>
 
-## 🌍 Where to find information
+---
 
-This system has information organized for different needs: **Starting Out**, **Exploring**, and **Planning**.
+## 🗂️ Contents
 
-### 📖 Folder Guide
-
-| Resource | Goal |
+| Document | Description |
 | :--- | :--- |
-| **Main Guide** | The best place to start. Explains setup and usage. |
-| **Interactive API** | A sandbox to test predictions without the web app. |
-| **Future Planning** | Concepts for how to improve the system further. |
+| **[Model Monitoring](model_monitoring.md)** | Conceptual design for future data drift and prediction drift monitoring. |
+| **[Root Guide](../README.md)** | The main entry point for installing and running the system. |
 
 ---
 
-## 🕹️ Interactive Testing
+## 🔮 Roadmap
 
-When the Prediction Service is running, you can access a special "sandbox" page:
+The `model_monitoring.md` document outlines features that are **conceptual** and not yet implemented in code, such as:
 
-**Link**: `http://localhost:8000/docs`
+* Population Stability Index (PSI) checks.
+* Automated retraining triggers.
+* Feature Store integration.
 
-### 🔬 What to try
-
-* **Test Errors**: Try typing an invalid age to see how the system catches mistakes.
-* **Test Success**: Type a valid patient profile to see how fast the system gives a result.
-
----
-
-## 🔮 What's Next?
-
-You can read `docs/model_monitoring.md` to see our plans for how to keep the system accurate over many years as patient trends change.
+> [!NOTE]
+> These are architectural proposals for the next phase of development.

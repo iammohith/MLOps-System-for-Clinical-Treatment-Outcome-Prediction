@@ -2,53 +2,100 @@
 
 <div align="center">
 
-![JavaScript](https://img.shields.io/badge/Language-JavaScript-F7DF1E?style=flat-square&logo=javascript)
-![Design](https://img.shields.io/badge/Style-Modern-blue?style=flat-square)
+![JavaScript](https://img.shields.io/badge/Language-Vanilla%20JS-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![API](https://img.shields.io/badge/API-Connected-green?style=for-the-badge)
+
+**A lightweight, zero-dependency dashboard for clinical predictions.**
+*Verified for local execution.*
+
+[⬅️ Back to Root](../README.md)
 
 </div>
 
-## ✨ A User-Friendly Dashboard
-
-This web application is designed to be simple and clear for researchers. It makes it easy to enter patient details and see the predicted results instantly.
-
-### Key Features
-
-* **Automatic Lists**: The dropdown choices for conditions and drugs stay updated automatically as the system changes.
-* **Visual Results**: Predicted scores are shown on an easy-to-read circular gauge.
-* **Safety Reminders**: Important clinical disclaimers are always visible to ensure proper use.
-
 ---
 
-## 🏗️ How the App Behaves
+## 📱 State Management & Data Flow
+
+The frontend follows a unidirectional data flow pattern, driven by the Backend's schema.
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Start
-    Start --> Loading: Page Opens
-    Loading --> Ready: Getting Rules from Service
-    Ready --> Working: User Clicks Predict
-    Working --> Success: Show Score
-    Working --> FixNeeded: Service found an Error
-    Success --> Ready: New Search
-    FixNeeded --> Ready: Correct Info
+graph TD
+    Init((Page Load)) --> FetchConfig[Fetch /dropdown-values]
+    FetchConfig --> Populate[Populate <select> Options]
+    
+    User((Clinician)) --> Input[Fill Form]
+    Input --> ClickPredict[Click 'Predict']
+    
+    ClickPredict --> POST[POST /predict]
+    POST --> API{API Response}
+    
+    API -- Success --> Render[Render Gauge & Score]
+    API -- Error --> Alert[Show Error Alert]
 ```
 
 ---
 
-## 🏃 How to Open the App
+## 🧠 Design Decisions
 
-The app is a simple set of files that can be opened in any web browser.
+| Decision | Rationale |
+| :--- | :--- |
+| **Vanilla JS (No Framework)** | For a simple dashboard, React/Vue adds unnecessary build complexity (npm install, webpack, etc.). This runs natively in any browser. |
+| **Dynamic Dropdowns** | Hardcoding values in HTML (`<option value="DrugA">`) drift from the backend. We fetch valid values from `/dropdown-values` (driven by `params.yaml`) to ensure synchronization. |
+| **CSS Variables** | Used for theming (Dark Mode ready) without needing a preprocessor like SASS. |
 
-### Simple Start
+---
+
+## 🧪 Valid Test Case
+
+Use this data to verify the system is working:
+
+| Field | Value |
+| :--- | :--- |
+| **Age** | `45` |
+| **Gender** | `Male` |
+| **Condition** | `Hypertension` |
+| **Drug** | `Amlodipine` |
+| **Dosage** | `50` |
+| **Duration** | `30` |
+
+---
+
+## 🚀 How to Run
+
+### Option 1: Using Make (Recommended)
 
 ```bash
-cd frontend && python -m http.server 8080
+make run-frontend
 ```
 
-Then visit: `http://localhost:8080`
+*Access at: `http://localhost:8080`*
+
+### Option 2: Manual Start
+
+```bash
+cd frontend
+python3 -m http.server 8080
+```
+
+> [!IMPORTANT]
+> **Prerequisite**: The Prediction API must be running on `http://localhost:8000`.
 
 ---
 
-## 🩺 Interaction
+## 📁 Directory Manifest
 
-The web app talks to the "Prediction Service" running on your computer. If the service isn't running, the web app won't be able to calculate new scores.
+| File | Description |
+| :--- | :--- |
+| `index.html` | The HTML5 structure. Contains the form and result containers. |
+| `app.js` | Business logic. form handling, API fetching, DOM manipulation. |
+| `styles.css` | Styling. Flexbox/Grid layouts, animations, and responsive design. |
+
+---
+
+## ❓ Troubleshooting
+
+| Issue | Cause | Fix |
+| :--- | :--- | :--- |
+| **Dropdowns Empty** | Frontend cannot reach API (`/dropdown-values` failed). | Ensure API is running on port 8000. Check console for CORS errors. |
+| **"Network Error"** | API is down or blocking the request. | Check Validation/Network tab in Developer Tools. |
+| **Visual Glitches** | Old CSS cached. | Hard refresh (`Cmd+Shift+R`). |

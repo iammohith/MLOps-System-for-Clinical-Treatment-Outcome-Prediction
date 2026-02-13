@@ -20,7 +20,7 @@ import time
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from prometheus_client import (
@@ -93,13 +93,19 @@ async def lifespan(app: FastAPI):
         MODEL_INFO.labels(version=model_loader.version).set(1)
         logger.info(f"Model loaded successfully: {model_loader.version}")
     except Exception as e:
-        logger.error(f"Failed to load model: {e}")
-        logger.warning("API starting without model — /predict will fail")
-
+        logger.critical(f"CRITICAL: Failed to load model: {e}")
+        logger.critical("Service cannot start without model. Exiting...")
+        # STRICT: Fail Fast. 
+        # Do not start in a zombie state. Force orchestrator to restart.
+        raise e
+    
     yield
 
 
 # --- App ---
+# --- Security Headers & Middleware ---
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+
 app = FastAPI(
     title="Clinical Treatment Outcome Prediction API",
     description=(
@@ -111,14 +117,42 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Enforce allowed hosts
+app.add_middleware(
+    TrustedHostMiddleware, 
+    allowed_hosts=["localhost", "127.0.0.1", "inference-api", "0.0.0.0"]
+)
+
 # --- CORS ---
+# STRICT: Only allow known origins. 
+# In production, this should be injected via env vars.
+# For this audit, we hardcode the known local and K8s service origins.
+ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://frontend:8080", 
+    "http://localhost:30880", # K8s NodePort
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+
+
+# --- Security Headers ---
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    return response
 
 
 # --- Middleware for request logging ---
@@ -145,14 +179,24 @@ async def log_requests(request: Request, call_next):
 
 
 # --- Endpoints ---
+# --- Endpoints ---
 @app.get("/health", response_model=HealthResponse, tags=["System"])
-async def health_check():
+async def health_check(response: Response):
     """Liveness and readiness check."""
+    if not model_loader.is_loaded:
+        response.status_code = 503
+        return HealthResponse(
+            status="unhealthy",
+            model_loaded=False,
+            model_version="unknown",
+        )
+
     return HealthResponse(
         status="healthy",
-        model_loaded=model_loader.is_loaded,
+        model_loaded=True,
         model_version=model_loader.version,
     )
+
 
 
 @app.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
