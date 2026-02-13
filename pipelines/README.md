@@ -21,16 +21,16 @@ The pipeline is defined in `dvc.yaml` and executes in verified stages. This Dire
 ```mermaid
 graph TD
     subgraph "Safety Checks"
-        Ingest[("Ingest\n(Safe Read & Copy)")] --> Validate[("Validate \n (Schema & Range Check)")]
+        Ingest[("Ingest (Safe Read & Copy)")] --> Validate[("Validate (Schema & Range Check)")]
     end
 
     subgraph "Transformation"
-        Validate --> Preprocess[("Preprocess \n (OneHot & Scaling)")]
+        Validate --> Preprocess[("Preprocess (OneHot & Scaling)")]
     end
 
     subgraph "Modeling"
-        Preprocess --> Train[("Train Model\n(RandomForest)")]
-        Train --> Evaluate[("Evaluate\n(RMSE/R2 Metrics)")]
+        Preprocess --> Train[("Train Model (RandomForest)")]
+        Train --> Evaluate[("Evaluate (RMSE/R2 Metrics)")]
     end
     
     style Ingest fill:#e1f5fe,stroke:#01579b
