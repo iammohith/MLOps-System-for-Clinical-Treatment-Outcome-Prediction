@@ -1,105 +1,104 @@
-# Model Monitoring — Conceptual Design
+# 📄 Technical Spec: Advanced Model Monitoring
 
-## Overview
+<div align="center">
 
-This document describes how model monitoring could be implemented for the Clinical Treatment Outcome Prediction system. It covers data drift detection, prediction drift monitoring, and operational considerations.
+![Status](https://img.shields.io/badge/Status-RFC_(Request_For_Comments)-orange?style=for-the-badge)
+![Scope](https://img.shields.io/badge/Scope-Future_Architecture-blue?style=for-the-badge)
 
-> **Disclaimer**: This system predicts patient treatment outcome scores to support clinical research, quality analysis, and exploratory analytics. It does not provide diagnostic or treatment recommendations.
+**Architectural proposal for Data Drift, Concept Drift, and Bias Detection.**
 
----
+[⬅️ Back to Docs](./README.md)
 
-## What Is Implemented
-
-### Operational Monitoring (Active)
-
-The following metrics are actively tracked via Prometheus:
-
-| Metric | Type | Description |
-|--------|------|-------------|
-| `api_request_total` | Counter | Total API requests by method, endpoint, status |
-| `api_prediction_total` | Counter | Total predictions served |
-| `api_prediction_errors_total` | Counter | Total prediction errors |
-| `api_request_duration_seconds` | Histogram | Request latency distribution |
-| `model_info` | Gauge | Model version label |
-
-These are scraped by Prometheus every 15 seconds and visualized in Grafana dashboards.
+</div>
 
 ---
 
-## What Is NOT Implemented (and Why)
+## 1. Executive Summary
 
-### 1. Data Drift Detection
+### Objective
 
-**What it would do**: Detect when incoming prediction requests differ statistically from training data distribution.
+Transition from **Operational Monitoring** (System Health, Latency) to **ML Observability** (Data Quality, Model Decay).
 
-**Methods that could be used**:
+### Current State (v1.0)
 
-- **Population Stability Index (PSI)**: Measures shift between training and serving distributions. PSI > 0.2 indicates significant drift.
-- **Kolmogorov-Smirnov (KS) Test**: Non-parametric test for distribution changes in numeric features.
-- **Chi-Square Test**: For categorical feature distribution changes.
+- **Metrics**: Prometheus tracks `api_prediction_total` and `latency`.
+- **Gap**: No visibility into *why* a model might be failing (e.g., input distribution shift).
 
-**Why not implemented**:
+### Proposed State (v2.0)
 
-- Requires a persistent store of prediction inputs (database or feature store)
-- Needs a reference distribution snapshot from training data
-- Adds infrastructure complexity (scheduling, alerting, storage)
-- Current dataset is static (1000 rows) — drift is not expected in a research context
-
-**Safe alternative**: Log prediction inputs to a timestamped CSV and periodically run manual distribution comparisons.
-
-### 2. Prediction Drift Monitoring
-
-**What it would do**: Track if prediction distribution shifts over time even if input distribution stays stable.
-
-**Why not implemented**:
-
-- Requires ground truth labels (actual Improvement_Score) to detect concept drift
-- In a research context, ground truth may not be available for weeks/months
-- Without ground truth, only proxy metrics (prediction mean, variance) can be tracked
-
-**Safe alternative**: Add a Prometheus gauge tracking rolling prediction mean and variance. Alert if prediction mean shifts > 1 standard deviation from training set mean.
-
-### 3. Feature Importance Drift
-
-**What it would do**: Track if model's reliance on features changes across retraining cycles.
-
-**Why not implemented**: Requires multiple model versions and automated comparison infrastructure.
+- **Drift Detection**: Automated alerts when input data diverges from training baseline.
+- **Bias Auditing**: Real-time tracking of fairness metrics across protected groups (Gender/Age).
 
 ---
 
-## Recommended Future Implementation
+## 2. Target Architecture
 
-If this system moves toward production, the following should be implemented in order:
+The proposed architecture introduces a "Store & Analyze" pattern using an asynchronous sidecar.
 
-1. **Prediction logging** → Store all prediction requests/responses with timestamps
-2. **PSI monitoring** → Weekly PSI calculation for top features
-3. **Prediction distribution tracking** → Rolling mean/variance gauge in Prometheus
-4. **Ground truth collection** → Periodic feedback loop for actual outcomes
-5. **Automated retraining trigger** → If PSI > 0.2 on any feature, trigger retraining pipeline
-
----
-
-## Architecture for Future Drift Detection
-
-```
-Prediction Request → API → Model → Response
-                      ↓
-              Prediction Logger
-                      ↓
-              Feature Store / DB
-                      ↓
-           Scheduled Drift Analysis
-                      ↓
-              PSI / KS Calculation
-                      ↓
-            Alert if threshold exceeded
-                      ↓
-           Trigger Retraining Pipeline
+```mermaid
+graph TD
+    Client -->|POST /predict| API[Inference API]
+    API -->|Log Payload| Queue[Message Queue (Redis/Kafka)]
+    API -->|Response| Client
+    
+    subgraph "Async Analysis Layer"
+        Queue -->|Consume| Worker[Drift Analyzer Worker]
+        Worker -->|Fetch Baseline| FeatureStore[(Training Reference)]
+        
+        Worker -->|Compute Metric| PSI[PSI Calculator]
+        PSI -->|Metric > 0.2| Alert[PagerDuty/Slack]
+        PSI -->|Save Metric| TimeSeriesDB[Prometheus]
+    end
+    
+    style API fill:#e3f2fd,stroke:#1565c0
+    style Worker fill:#fff9c4,stroke:#fbc02d
+    style Alert fill:#ffebee,stroke:#c62828
 ```
 
-This architecture would require:
+---
 
-- A persistent store (PostgreSQL or similar)
-- A scheduler (cron or Airflow)
-- An alerting mechanism (Prometheus AlertManager)
-- A retraining orchestrator (DVC pipeline trigger)
+## 3. Metrics Specification
+
+### A. Data Drift (Population Stability Index - PSI)
+
+- **Definition**: Measures the difference in distribution between the serving data ($S$) and training data ($T$) for a given feature.
+- **Thresholds**:
+  - $PSI < 0.1$: No significant drift.
+  - $PSI \ge 0.2$: **Critical Alert**. Retraining required.
+
+### B. Concept Drift (Prediction Shift)
+
+- **Definition**: Change in the distribution of the predicted target variable (`Improvement_Score`).
+- **Proxy**: Since ground truth comes late, we monitor the *Prediction Mean* and *Variance* over time windows (e.g., 24h rolling).
+
+---
+
+## 4. Implementation Stages
+
+### Phase 1: Payload Logging (Q2 2026)
+
+**Goal**: Persist every prediction request/response for offline analysis.
+
+- **Tech**: JSON-Lines (JSONL) rotation on shared volume or S3 upload.
+
+### Phase 2: Scheduled Analysis (Q3 2026)
+
+**Goal**: Daily batch job to compute PSI.
+
+- **Tech**: Airflow DAG running `deepchecks` or `evidently` suites.
+
+### Phase 3: Real-Time Intervention (Q4 2026)
+
+**Goal**: Automated circuit breakers.
+
+- **Logic**: If $PSI > 0.5$ for 1 hour, fallback to a "Safe Mode" (heuristic rule-based) model.
+
+---
+
+## 5. Alternatives Considered
+
+| Approach | Pros | Cons | Decision |
+| :--- | :--- | :--- | :--- |
+| **In-App Calculation** | Simple, no extra infra. | Increases API latency. Blocks main thread. | ❌ Rejected |
+| **Async Sidecar** | Decoupled, scalable. | Adds complexity (Queue, Worker). | ✅ Accepted |
+| **Vendor Solution** | "Magical" integration. | Vendor lock-in, data privacy concerns. | ❌ Rejected |

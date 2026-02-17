@@ -1,4 +1,16 @@
-# Contributor Covenant Code of Conduct
+# 📜 Code of Conduct
+
+<div align="center">
+
+![Standard](https://img.shields.io/badge/Standard-Contributor_Covenant_1.4-blue?style=for-the-badge)
+
+**Our pledge to foster an open and welcoming environment.**
+
+[⬅️ Back to Root](./README.md)
+
+</div>
+
+---
 
 ## Our Pledge
 
