@@ -12,8 +12,6 @@
 **A production-hardened, zero-trust MLOps system for predicting clinical treatment outcomes.**
 *Engineered for Reliability, Reproducibility, and Scalability.*
 
-[Quick Start](#-quick-start) | [Architecture](#-architecture-overview) | [Security](#-security-considerations) | [Contributing](#-contributing-guidelines)
-
 </div>
 
 ---
