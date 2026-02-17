@@ -100,7 +100,7 @@ Data validation is strict and defined in `inference/schemas.py`.
 
 * **Input**: `PredictionRequest`
   * `Patient_ID`: String
-  * `Age`: Int (0-100)
+  * `Age`: Int (18-79)
   * `Gender`: Enum (Male/Female)
   * ...
 * **Output**: `PredictionResponse`

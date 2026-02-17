@@ -100,10 +100,10 @@ graph TD
 
 Data validation is enforced by `validate.py` using `params.yaml`.
 
-* **Age**: Int [0-100]
+* **Age**: Int [18, 79]
 * **Gender**: Enum [Male, Female]
 * **Condition**: Enum [Diabetes, Hypertension, ...]
-* **Treatment_Duration**: Int [1-365]
+* **Treatment_Duration**: Int [5, 59]
 
 ### Artifacts (DTOs)
 
