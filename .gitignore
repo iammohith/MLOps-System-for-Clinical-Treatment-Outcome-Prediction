@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# DVC
+/tmp/dvc-remote/
+
+# Model artifacts (tracked by DVC)
+models/*.joblib
+data/processed/*.csv
+data/processed/*.joblib
+
+# Metrics (generated)
+metrics/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables
+.env

@@ -1,0 +1,28 @@
+cmd: python training/evaluate.py
+deps:
+- path: data/processed/X_test.csv
+  hash: md5
+  md5: 8c8e75eff7ea0ab180738f34c2fa6d40
+  size: 54612
+- path: data/processed/y_test.csv
+  hash: md5
+  md5: 15b3cbd23f5c313b05ab9726ab6b0660
+  size: 824
+- path: models/model.joblib
+  hash: md5
+  md5: 27535071c9dd8554fab77cb78fb603fa
+  size: 4213793
+- path: training/evaluate.py
+  hash: md5
+  md5: 9aa03d9a7ada6131ddf34a1aa0031911
+  size: 2099
+params:
+  params.yaml:
+    data.metrics_dir: metrics
+    data.model_dir: models
+    data.processed_dir: data/processed
+outs:
+- path: metrics/scores.json
+  hash: md5
+  md5: 3819df8be13d6205859195d9126ed3cf
+  size: 76

@@ -1,0 +1,7 @@
+# DVC ignore patterns
+__pycache__
+.git
+.venv
+venv
+.idea
+.vscode
