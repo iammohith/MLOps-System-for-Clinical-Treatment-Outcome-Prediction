@@ -77,17 +77,17 @@ The **Clinical Dashboard** allows researchers to input patient variables and rec
 
 The system automatically tracks its own health and performance using industry-standard tools.
 
-### Grafana Dashboards
-
-Real-time visualization of system health, request rates, and model performance.
-
-![Grafana Dashboard](Grafana%20Dashboard.png)
-
 ### Prometheus Metrics
 
 Raw metric collection for deep-dive analysis by system administrators.
 
 ![Prometheus Metrics](Prometheus%20Metrics.png)
+
+### Grafana Dashboards
+
+Real-time visualization of system health, request rates, and model performance.
+
+![Grafana Dashboard](Grafana%20Dashboard.png)
 
 ---
 
