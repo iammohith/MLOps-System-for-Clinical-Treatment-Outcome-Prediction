@@ -189,6 +189,6 @@ dvc pull
 
 ---
 
-## 12. Future Improvements / Technical Debt
+## 12. Future Improvements
 - **Format Upgrades**: Shift from `.csv` to `.parquet` to preserve nested types, shrink storage sizes, and accelerate column-wise aggregations.
 - **Feature Store Integration**: Decouple static data tracking via robust Feast or Hopsworks infrastructure for dynamic real-time feature retrieval.
