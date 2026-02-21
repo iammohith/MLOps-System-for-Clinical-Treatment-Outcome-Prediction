@@ -49,3 +49,15 @@ htmlcov/
 
 # DVC ignores itself via its own config, but we ensure the local config is ignored
 .dvc/config.local
+
+# Kubernetes and Secrets
+# Ignore any YAML files that are explicitly named as secrets
+*secret*.yaml
+*secret*.yml
+# Ignore local kubeconfigs
+kubeconfig
+.kube/
+# Ignore any env files besides the example
+.env
+.env.*
+!.env.example
