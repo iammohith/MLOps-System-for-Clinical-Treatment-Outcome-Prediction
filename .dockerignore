@@ -44,8 +44,8 @@ htmlcov/
 # Data and Models
 # Usually, you want to copy specific data in the Dockerfile 
 # rather than sending everything in the build context.
-data/processed/
-models/
+# data/processed/
+# models/
 metrics/
 
 # Documentation
